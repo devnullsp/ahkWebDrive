@@ -2,7 +2,6 @@ fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
 wd := new WDSession()
 msgbox % wd.rc.raw
-
 if(wd.rc.isError){
     msgbox % "Error:" wd.rc.error " " wd.rc.message
     ExitApp
