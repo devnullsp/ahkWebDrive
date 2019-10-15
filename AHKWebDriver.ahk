@@ -6,18 +6,25 @@ if(wd.rc.isError){
     ExitApp
 }
 wd.url("https://autohotkey.com")
-msgbox % "get url: " wd.getUrl()
-msgbox % "back: " wd.back()
-msgbox % "forward: " wd.forward() 
-msgbox % "refresh: " wd.refresh() 
-msgbox % "get title: " wd.getTitle() 
-msgbox % "get Window: " (h1:=wd.getWindow())
-msgbox % "new window: " h2:=wd.newWindow("tab")
-msgbox % "window 2: " wd.window(h2)
-msgbox % "url : " wd.url("https://autohotkey.com")
-msgbox % "window 1: " wd.window(h1)
-msgbox % "window 2: " wd.window(h2)
-msgbox % "window 2: " wd.closeWindow()
+msgbox % "get url: " 			wd.getUrl()
+msgbox % "back: " 				wd.back()
+msgbox % "forward: " 			wd.forward() 
+msgbox % "refresh: " 			wd.refresh() 
+msgbox % "get title: " 			wd.getTitle() 
+msgbox % "get Window: " 		(h1:=wd.getWindow())
+msgbox % "new window: "			h2:=wd.newWindow("tab")
+msgbox % "window 2: " 			wd.window(h2)
+msgbox % "url : "     			wd.url("https://autohotkey.com")
+msgbox % "window 1: "			wd.window(h1)
+msgbox % "window 2: " 			wd.window(h2)
+msgbox % "get window handles: " wd.getWindowHandles() "`n" wd.rc.value.length() "`n"  wd.rc.value[2]
+msgbox % "windowMaximize: " 	wd.windowMaximize()
+msgbox % "windowMinimize: " 	wd.windowMinimize()
+msgbox % "windowFullscreen: " 	wd.windowFullscreen()
+msgbox % "windowRestore: "	 	wd.windowRestore()
+msgbox % "window close: "		wd.closeWindow()
+msgbox % "window 1: "			wd.window(h1)
+msgbox % "get window rect: "   (rect:=wd.getWindowRect()) "`n" "x: " rect.x " y: " rect.y " width: " rect.width " height: " rect.height
 msgbox Delete session
 wd.delete()
 
@@ -85,6 +92,32 @@ class WDSession{
     	this.rc := WSejecutar("DELETE", this.prefijo "session/" this.sessionId "/window")
 		return this.rc.isError
     }	
+	getWindowHandles(){
+		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/window/handles")
+		return this.rc.value
+	}
+	windowMaximize(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/maximize", "{}")
+		return this.rc.isError
+	}
+	windowMinimize(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/minimize", "{}")
+		return this.rc.isError
+	}
+	windowFullscreen(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/fullscreen", "{}")
+		return this.rc.isError
+	}
+	windowRestore(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/rect", "{}")
+		return this.rc.isError
+	}
+
+	getWindowRect(){
+		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/window/rect")
+		return this.rc.value
+	}
+
 
 
 }
