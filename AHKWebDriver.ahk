@@ -7,7 +7,14 @@ if(wd.rc.isError){
     ExitApp
 }
 wd.url("http://ibm.es")
-msgbox ->
+; msgbox % "url " wd.getUrl()
+; wd.url("http://google.es")
+; msgbox % "url " wd.getUrl() 
+wd.back()
+msgbox % dumpObj(wd.rc, "")
+msgbox % "forward " wd.forward() " " wd.rc.message " . " wd.rc.status
+msgbox % "refresh " wd.refresh() " " wd.rc.message " . " wd.rc.status
+msgbox Cerrar session
 wd.delete()
 
 ;Este objeto corresponde a la sesion.
@@ -27,9 +34,27 @@ class WDSession{
         local body := {}
         body.url := url
         this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/url", Jxon_Dump(body))
+		return this.rc.isError
     }
+	getUrl(){
+		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/url")
+		return this.rc.value
+	}
+	back(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/back")
+		return this.rc.isError
+	}
+	forward(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/forward")
+		return this.rc.isError
+	}
+	refresh(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/refresh")
+		return this.rc.isError
+	}
     delete(){
         this.rc := WSejecutar("DELETE", this.prefijo "session/" this.sessionId)
+		return this.rc.isError
     }
 }
 
@@ -321,14 +346,16 @@ Jxon_Dump(obj, indent:="", lvl:=1)
 */
 
 
-dumpObj(obj, ByRef c, sep)
+dumpObj(obj, sep)
 {
+	static c
     for i,k in obj
     {
         c .= "`n" sep i ":"
         if(IsObject(k))
-            dumpObj(k, c, sep "`t")
+            dumpObj(k, sep "`t")
         else
             c .= k
     }
+	return c
 }
