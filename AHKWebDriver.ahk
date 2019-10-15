@@ -1,21 +1,26 @@
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
 wd := new WDSession()
-msgbox % wd.rc.raw
 if(wd.rc.isError){
     msgbox % "Error:" wd.rc.error " " wd.rc.message
     ExitApp
 }
-wd.url("http://ibm.es")
-; msgbox % "url " wd.getUrl()
-; wd.url("http://google.es")
-; msgbox % "url " wd.getUrl() 
-wd.back()
-msgbox % dumpObj(wd.rc, "")
-msgbox % "forward " wd.forward() " " wd.rc.message " . " wd.rc.status
-msgbox % "refresh " wd.refresh() " " wd.rc.message " . " wd.rc.status
-msgbox Cerrar session
+wd.url("https://autohotkey.com")
+msgbox % "get url: " wd.getUrl()
+msgbox % "back: " wd.back()
+msgbox % "forward: " wd.forward() 
+msgbox % "refresh: " wd.refresh() 
+msgbox % "get title: " wd.getTitle() 
+msgbox % "get Window: " (h1:=wd.getWindow())
+msgbox % "new window: " h2:=wd.newWindow("tab")
+msgbox % "window 2: " wd.window(h2)
+msgbox % "url : " wd.url("https://autohotkey.com")
+msgbox % "window 1: " wd.window(h1)
+msgbox % "window 2: " wd.window(h2)
+msgbox % "window 2: " wd.closeWindow()
+msgbox Delete session
 wd.delete()
+
 
 ;Este objeto corresponde a la sesion.
 class WDSession{
@@ -27,7 +32,7 @@ class WDSession{
         local body := {}
         body.capabilities := {}
         this.rc := WSejecutar("POST", this.prefijo "session", Jxon_Dump(body))
-        this.sessionId := this.rc.isError ? "" : this.rc.json.value.sessionId
+        this.sessionId := this.rc.isError ? "" : this.rc.value.sessionId
         return  this
     }
     url(url){
@@ -41,29 +46,48 @@ class WDSession{
 		return this.rc.value
 	}
 	back(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/back")
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/back", "{}")
 		return this.rc.isError
 	}
 	forward(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/forward")
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/forward", "{}")
 		return this.rc.isError
 	}
 	refresh(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/refresh")
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/refresh", "{}")
 		return this.rc.isError
 	}
     delete(){
         this.rc := WSejecutar("DELETE", this.prefijo "session/" this.sessionId)
 		return this.rc.isError
     }
+	getTitle(){
+		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/title")
+		return this.rc.value
+	}
+	getWindow(){
+		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/window")
+		return this.rc.value
+	}
+	window(handle){
+        local body := {}
+        body.handle := handle
+        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window", Jxon_Dump(body))
+		return this.rc.isError
+    }
+	newWindow(type){
+		local body := {}
+        body.type := (type = "") ? "tab" : type
+        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/new", Jxon_Dump(body))
+		return this.rc.value.handle
+	}
+	closeWindow(){
+    	this.rc := WSejecutar("DELETE", this.prefijo "session/" this.sessionId "/window")
+		return this.rc.isError
+    }	
+
+
 }
-
-; objeto referente a un elemento
-; class WDWindow{
-;     idSession
-;     id
-
-; }
 
 ;Mapear ventana
 ; class WDElement{
@@ -86,23 +110,23 @@ class WDSession{
 
 
 WSejecutar(metodo, url, cuerpo:=""){
-    static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
+	static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
     local rc:={}
     WS_SERVIDOR.Open(metodo,url, false)
     WS_SERVIDOR.setRequestHeader("Content-Type","application/json; charset=UTF-8")
-    try WS_SERVIDOR.Send(cuerpo)
+    WS_SERVIDOR.Send(cuerpo)
     rc.status      := WS_SERVIDOR.Status
     rc.isErrorWeb  := (WS_SERVIDOR.Status < 200 or WS_SERVIDOR.Status > 299)
     rc.raw         := WS_SERVIDOR.ResponseText
     rc.json        := ""
     rc.isError     :=  rc.isErrorWeb
     if(!rc.isErrorWeb){
-        rc.json := Jxon_Load(rc.raw)
-        rc.isError := rc.json.value.hasKey("error")
-        rc.value := rc.json.value
+        rc.json    := Jxon_Load(rc.raw)
+		rc.value   := rc.json.value
+        rc.isError := rc.value.hasKey("error")
         if(rc.isError){
-            rc.error := rc.json.value.error
-            rc.message := rc.json.value.message
+            rc.error := rc.value.error
+            rc.message := rc.value.message
         }
     }
     return rc
