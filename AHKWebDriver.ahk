@@ -21,10 +21,13 @@ msgbox % "get window handles: " wd.getWindowHandles() "`n" wd.rc.value.length() 
 msgbox % "windowMaximize: " 	wd.windowMaximize()
 msgbox % "windowMinimize: " 	wd.windowMinimize()
 msgbox % "windowFullscreen: " 	wd.windowFullscreen()
-msgbox % "windowRestore: "	 	wd.windowRestore()
+msgbox % "windowRestore: "	 	wd.windowRect({})
 msgbox % "window close: "		wd.closeWindow()
 msgbox % "window 1: "			wd.window(h1)
+msgbox % "Window Rect: "		wd.windowRect({x:100, y:100})
 msgbox % "get window rect: "   (rect:=wd.getWindowRect()) "`n" "x: " rect.x " y: " rect.y " width: " rect.width " height: " rect.height
+msgbox % "getElementActive: "   wd.getElementActive() "`n" wd.rc.raw
+
 msgbox Delete session
 wd.delete()
 
@@ -108,13 +111,40 @@ class WDSession{
 		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/fullscreen", "{}")
 		return this.rc.isError
 	}
-	windowRestore(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/rect", "{}")
-		return this.rc.isError
-	}
-
 	getWindowRect(){
 		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/window/rect")
+		return this.rc.value
+	}
+	windowRect(x:="", y:="", width:="", height:=""){
+		local body := {}
+		if(IsObject(x))
+			body := x
+		else{
+			if(x!="")
+				body.x      := x
+			if(y!="")
+				body.y      := y
+			if(width!="")
+				body.width  := width
+			if(height!="")
+				body.height := height
+		}
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/rect", Jxon_Dump(body))
+		return this.rc.isError
+	}
+	frame(id:=""){
+		local body := {}
+		if(id!="")
+			body.id := id
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/frame", Jxon_Dump(body)) 
+		return this.rc.isError
+	}
+	frameParent(){
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/frame/parent", "{}")
+		return this.rc.isError
+	}
+	getElementActive(){
+		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/element/active")
 		return this.rc.value
 	}
 
