@@ -1,10 +1,14 @@
+#include jxon.ahk
+
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
+
 
 wd := new WDSession()
 if(wd.rc.isError){
     msgbox % "Error:" wd.rc.error " " wd.rc.message
     ExitApp
 }
+/*
 wd.url("https://autohotkey.com")
 msgbox % "get url: " 			wd.getUrl()
 msgbox % "back: " 				wd.back()
@@ -26,29 +30,52 @@ msgbox % "window close: "		wd.closeWindow()
 msgbox % "window 1: "			wd.window(h1)
 msgbox % "Window Rect: "		wd.windowRect({x:100, y:100})
 msgbox % "get window rect: "   (rect:=wd.getWindowRect()) "`n" "x: " rect.x " y: " rect.y " width: " rect.width " height: " rect.height
-msgbox % "getElementActive: "   wd.getElementActive() "`n" wd.rc.raw
+msgbox % "getElementActive: "   (e := wd.getElementActive()) "`n" e.ref " -> " e.sessionId "`n" wd.rc.raw
+msgbox % "element: "   (e := wd.element(WDSession.CSS,"#downloadLink")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "elements: "   (e := wd.elements(WDSession.TagName,"Link")) "`n" e.Count() " -> " e[1].ref "`n" wd.rc.raw
+*/
+e:=""
+f:=""
+msgbox % "url: " (e:=wd.url("file:///C:/PRG/Selenium/test1.html")) "`n" e.rc.raw
+/*
+msgbox % "element option: "   (e := wd.element(WDSession.XPath,"/html/body/select/option[1]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get selected (element): "   (f := e.getSelected()) "`n" f "`n" e.rc.raw
+*/
+msgbox % "input check: "   (e := wd.element(WDSession.XPath,"/html/body/p/input[2]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get selected (element): "   (f := e.getSelected())  "`n" e.rc.raw
+msgbox % "get attribute (value): "   (f := e.getAttributed("name")) "`n" e.rc.raw
+
 
 msgbox Delete session
 wd.delete()
-
+ExitAPP
 
 ;Este objeto corresponde a la sesion.
 class WDSession{
+
+	;-- Selectors -------------------------------------
+	static CSS				:= "css selector"
+	static LinkText 		:= "link text"
+	static PartialLinkTExt  := "partial link text"
+	static TagName			:= "tag name"
+	static XPath			:= "xpath"
+
+	;-- instance vars ---------------------------------
     sessionId := ""
     prefijo   := "http://localhost:9515/"
     rc        := ""
     
     __New(){
-        local body := {}
+ 	    local body := {}
         body.capabilities := {}
-        this.rc := WSejecutar("POST", this.prefijo "session", Jxon_Dump(body))
+        this.rc := WSejecutar("POST", this.prefijo "session",jxon_Dump(body) )
         this.sessionId := this.rc.isError ? "" : this.rc.value.sessionId
         return  this
     }
     url(url){
         local body := {}
         body.url := url
-        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/url", Jxon_Dump(body))
+        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/url", jxon_Dump(body))
 		return this.rc.isError
     }
 	getUrl(){
@@ -82,13 +109,13 @@ class WDSession{
 	window(handle){
         local body := {}
         body.handle := handle
-        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window", Jxon_Dump(body))
+        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window", jxon_Dump(body))
 		return this.rc.isError
     }
 	newWindow(type){
 		local body := {}
         body.type := (type = "") ? "tab" : type
-        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/new", Jxon_Dump(body))
+        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/new", jxon_Dump(body))
 		return this.rc.value.handle
 	}
 	closeWindow(){
@@ -129,14 +156,14 @@ class WDSession{
 			if(height!="")
 				body.height := height
 		}
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/rect", Jxon_Dump(body))
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/rect", jxon_Dump(body))
 		return this.rc.isError
 	}
 	frame(id:=""){
 		local body := {}
 		if(id!="")
 			body.id := id
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/frame", Jxon_Dump(body)) 
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/frame", jxon_Dump(body)) 
 		return this.rc.isError
 	}
 	frameParent(){
@@ -145,32 +172,52 @@ class WDSession{
 	}
 	getElementActive(){
 		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/element/active")
-		return this.rc.value
+		if(this.rc.isError) 
+			return ""
+		return new WDSession.WebElement(this.rc.value, this)
+	}
+	element(selector, value){
+		local body := {using: selector, value: value }
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/element", jxon_Dump(body))
+		if(this.rc.isError) 
+			return ""
+		return new WDSession.WebElement(this.rc.value, this)
+	}
+	elements(selector, value){
+		local body := {using: selector, value: value }
+		local list,i,k
+		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/elements", jxon_Dump(body))
+		if(this.rc.isError) 
+			return ""
+		list:=[]
+		loop % this.rc.value.Count()
+			list.push(new WDSession.WebElement(this.rc.value[A_index], this))
+		return list
 	}
 
-
+	class WebElement{
+		ref        := ""
+		objSession := ""
+		rc 		   := ""
+		__New(obj, objSession){
+			this.ref 		:= obj["element-6066-11e4-a52e-4f735466cecf"]
+			this.objSession := objSession
+		}
+		getSelected(){
+			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/selected")
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
+		getAttribute(name){
+			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/attribute/" name)
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
+	}
 
 }
-
-;Mapear ventana
-; class WDElement{
-;     idSession
-;     id
-;     element()  {}
-;     elements() {}
-;     selected(name) {}
-;     attribute(name) {}
-;     property(name) {}
-;     CSSProperty(name){}
-;     text(){}
-;     name(){}
-;     rect(){}
-;     enabled(){}
-;     clear(){}
-;     value(){}
-
-; }
-
 
 WSejecutar(metodo, url, cuerpo:=""){
 	static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
@@ -184,7 +231,7 @@ WSejecutar(metodo, url, cuerpo:=""){
     rc.json        := ""
     rc.isError     :=  rc.isErrorWeb
     if(!rc.isErrorWeb){
-        rc.json    := Jxon_Load(rc.raw)
+        rc.json    := jxon_Load(rc.raw)
 		rc.value   := rc.json.value
         rc.isError := rc.value.hasKey("error")
         if(rc.isError){
@@ -195,218 +242,6 @@ WSejecutar(metodo, url, cuerpo:=""){
     return rc
 }
 
-Jxon_Load(ByRef src, args*)
-{
-	static q := Chr(34)
-
-	key := "", is_key := false
-	stack := [ tree := [] ]
-	is_arr := { (tree): 1 }
-	next := q . "{[01234567890-tfn"
-	pos := 0
-	while ( (ch := SubStr(src, ++pos, 1)) != "" )
-	{
-		if InStr(" `t`n`r", ch)
-			continue
-		if !InStr(next, ch, true)
-		{
-			ln := ObjLength(StrSplit(SubStr(src, 1, pos), "`n"))
-			col := pos - InStr(src, "`n",, -(StrLen(src)-pos+1))
-
-			msg := Format("{}: line {} col {} (char {})"
-			,   (next == "")      ? ["Extra data", ch := SubStr(src, pos)][1]
-			  : (next == "'")     ? "Unterminated string starting at"
-			  : (next == "\")     ? "Invalid \escape"
-			  : (next == ":")     ? "Expecting ':' delimiter"
-			  : (next == q)       ? "Expecting object key enclosed in double quotes"
-			  : (next == q . "}") ? "Expecting object key enclosed in double quotes or object closing '}'"
-			  : (next == ",}")    ? "Expecting ',' delimiter or object closing '}'"
-			  : (next == ",]")    ? "Expecting ',' delimiter or array closing ']'"
-			  : [ "Expecting JSON value(string, number, [true, false, null], object or array)"
-			    , ch := SubStr(src, pos, (SubStr(src, pos)~="[\]\},\s]|$")-1) ][1]
-			, ln, col, pos)
-
-			throw Exception(msg, -1, ch)
-		}
-
-		is_array := is_arr[obj := stack[1]]
-
-		if i := InStr("{[", ch)
-		{
-			val := (proto := args[i]) ? new proto : {}
-			is_array? ObjPush(obj, val) : obj[key] := val
-			ObjInsertAt(stack, 1, val)
-			
-			is_arr[val] := !(is_key := ch == "{")
-			next := q . (is_key ? "}" : "{[]0123456789-tfn")
-		}
-
-		else if InStr("}]", ch)
-		{
-			ObjRemoveAt(stack, 1)
-			next := stack[1]==tree ? "" : is_arr[stack[1]] ? ",]" : ",}"
-		}
-
-		else if InStr(",:", ch)
-		{
-			is_key := (!is_array && ch == ",")
-			next := is_key ? q : q . "{[0123456789-tfn"
-		}
-
-		else ; string | number | true | false | null
-		{
-			if (ch == q) ; string
-			{
-				i := pos
-				while i := InStr(src, q,, i+1)
-				{
-					val := StrReplace(SubStr(src, pos+1, i-pos-1), "\\", "\u005C")
-					static end := A_AhkVersion<"2" ? 0 : -1
-					if (SubStr(val, end) != "\")
-						break
-				}
-				if !i ? (pos--, next := "'") : 0
-					continue
-
-				pos := i ; update pos
-
-				  val := StrReplace(val,    "\/",  "/")
-				, val := StrReplace(val, "\" . q,    q)
-				, val := StrReplace(val,    "\b", "`b")
-				, val := StrReplace(val,    "\f", "`f")
-				, val := StrReplace(val,    "\n", "`n")
-				, val := StrReplace(val,    "\r", "`r")
-				, val := StrReplace(val,    "\t", "`t")
-
-				i := 0
-				while i := InStr(val, "\",, i+1)
-				{
-					if (SubStr(val, i+1, 1) != "u") ? (pos -= StrLen(SubStr(val, i)), next := "\") : 0
-						continue 2
-
-					; \uXXXX - JSON unicode escape sequence
-					xxxx := Abs("0x" . SubStr(val, i+2, 4))
-					if (A_IsUnicode || xxxx < 0x100)
-						val := SubStr(val, 1, i-1) . Chr(xxxx) . SubStr(val, i+6)
-				}
-
-				if is_key
-				{
-					key := val, next := ":"
-					continue
-				}
-			}
-
-			else ; number | true | false | null
-			{
-				val := SubStr(src, pos, i := RegExMatch(src, "[\]\},\s]|$",, pos)-pos)
-			
-			; For numerical values, numerify integers and keep floats as is.
-			; I'm not yet sure if I should numerify floats in v2.0-a ...
-				static number := "number", integer := "integer"
-				if val is %number%
-				{
-					if val is %integer%
-						val += 0
-				}
-			; in v1.1, true,false,A_PtrSize,A_IsUnicode,A_Index,A_EventInfo,
-			; SOMETIMES return strings due to certain optimizations. Since it
-			; is just 'SOMETIMES', numerify to be consistent w/ v2.0-a
-				else if (val == "true" || val == "false")
-					val := %value% + 0
-			; AHK_H has built-in null, can't do 'val := %value%' where value == "null"
-			; as it would raise an exception in AHK_H(overriding built-in var)
-				else if (val == "null")
-					val := ""
-			; any other values are invalid, continue to trigger error
-				else if (pos--, next := "#")
-					continue
-				
-				pos += i-1
-			}
-			
-			is_array? ObjPush(obj, val) : obj[key] := val
-			next := obj==tree ? "" : is_array ? ",]" : ",}"
-		}
-	}
-
-	return tree[1]
-}
-
-Jxon_Dump(obj, indent:="", lvl:=1)
-{
-	static q := Chr(34)
-
-	if IsObject(obj)
-	{
-		static Type := Func("Type")
-		if Type ? (Type.Call(obj) != "Object") : (ObjGetCapacity(obj) == "")
-			throw Exception("Object type not supported.", -1, Format("<Object at 0x{:p}>", &obj))
-
-		is_array := 0
-		for k in obj
-			is_array := k == A_Index
-		until !is_array
-
-		static integer := "integer"
-		if indent is %integer%
-		{
-			if (indent < 0)
-				throw Exception("Indent parameter must be a postive integer.", -1, indent)
-			spaces := indent, indent := ""
-			Loop % spaces
-				indent .= " "
-		}
-		indt := ""
-		Loop, % indent ? lvl : 0
-			indt .= indent
-
-		lvl += 1, out := "" ; Make #Warn happy
-		for k, v in obj
-		{
-			if IsObject(k) || (k == "")
-				throw Exception("Invalid object key.", -1, k ? Format("<Object at 0x{:p}>", &obj) : "<blank>")
-			
-			if !is_array
-				out .= ( ObjGetCapacity([k], 1) ? Jxon_Dump(k) : q . k . q ) ;// key
-				    .  ( indent ? ": " : ":" ) ; token + padding
-			out .= Jxon_Dump(v, indent, lvl) ; value
-			    .  ( indent ? ",`n" . indt : "," ) ; token + indent
-		}
-
-		if (out != "")
-		{
-			out := Trim(out, ",`n" . indent)
-			if (indent != "")
-				out := "`n" . indt . out . "`n" . SubStr(indt, StrLen(indent)+1)
-		}
-		
-		return is_array ? "[" . out . "]" : "{" . out . "}"
-	}
-
-	; Number
-	else if (ObjGetCapacity([obj], 1) == "")
-		return obj
-
-	; String (null -> not supported by AHK)
-	if (obj != "")
-	{
-		  obj := StrReplace(obj,  "\",    "\\")
-		, obj := StrReplace(obj,  "/",    "\/")
-		, obj := StrReplace(obj,    q, "\" . q)
-		, obj := StrReplace(obj, "`b",    "\b")
-		, obj := StrReplace(obj, "`f",    "\f")
-		, obj := StrReplace(obj, "`n",    "\n")
-		, obj := StrReplace(obj, "`r",    "\r")
-		, obj := StrReplace(obj, "`t",    "\t")
-
-		static needle := (A_AhkVersion<"2" ? "O)" : "") . "[^\x20-\x7e]"
-		while RegExMatch(obj, needle, m)
-			obj := StrReplace(obj, m[0], Format("\u{:04X}", Ord(m[0])))
-	}
-	
-	return q . obj . q
-}
 
 /*
 {"value":
