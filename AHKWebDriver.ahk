@@ -2,12 +2,12 @@
 
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
-
 wd := new WDSession()
 if(wd.rc.isError){
     msgbox % "Error:" wd.rc.error " " wd.rc.message
     ExitApp
 }
+
 /*
 wd.url("https://autohotkey.com")
 msgbox % "get url: " 			wd.getUrl()
@@ -41,10 +41,16 @@ msgbox % "url: " (e:=wd.url("file:///C:/PRG/Selenium/test1.html")) "`n" e.rc.raw
 msgbox % "element option: "   (e := wd.element(WDSession.XPath,"/html/body/select/option[1]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
 msgbox % "get selected (element): "   (f := e.getSelected()) "`n" f "`n" e.rc.raw
 */
-msgbox % "input check: "   (e := wd.element(WDSession.XPath,"/html/body/p/input[2]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
-msgbox % "get selected (element): "   (f := e.getSelected())  "`n" e.rc.raw
-msgbox % "get attribute (value): "   (f := e.getAttributed("name")) "`n" e.rc.raw
-
+msgbox % "input check: "   					(e := wd.element(WDSession.XPath,"/html/body/p/input[2]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get selected (element): " 		(f := e.getSelected())  "`n" e.rc.raw
+msgbox % "get attribute (value): "  		(f := e.getAttribute("name")) "`n" e.rc.raw
+msgbox % "get attribute (esteNoExiste): "   (f := e.getAttribute("esteNoExiste")) "`n" e.rc.raw
+msgbox % "get property (value): "   		(f := e.getProperty("name")) "`n" e.rc.raw
+msgbox % "get property (esteNoExiste): "   	(f := e.getProperty("esteNoExiste")) "`n" e.rc.raw
+msgbox % "get CSS (color): "   				(f := e.getCSS("color")) "`n" e.rc.raw
+msgbox % "get text: "	  	 				(f := e.getText()) "`n" e.rc.raw
+msgbox % "input check campo: "  			(e := wd.element(WDSession.XPath,"//*[@id='campo']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get text: "	  	 				(f := e.getText()) "`n" e.rc.raw
 
 msgbox Delete session
 wd.delete()
@@ -52,7 +58,6 @@ ExitAPP
 
 ;Este objeto corresponde a la sesion.
 class WDSession{
-
 	;-- Selectors -------------------------------------
 	static CSS				:= "css selector"
 	static LinkText 		:= "link text"
@@ -64,7 +69,6 @@ class WDSession{
     sessionId := ""
     prefijo   := "http://localhost:9515/"
     rc        := ""
-    
     __New(){
  	    local body := {}
         body.capabilities := {}
@@ -194,7 +198,6 @@ class WDSession{
 			list.push(new WDSession.WebElement(this.rc.value[A_index], this))
 		return list
 	}
-
 	class WebElement{
 		ref        := ""
 		objSession := ""
@@ -215,10 +218,26 @@ class WDSession{
 				return ""
 			return this.rc.value
 		}
+		getProperty(name){
+			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/property/" name)
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
+		getCSS(propertyName){
+			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/css/" propertyName)
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
+		getText(){
+			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/text")
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
 	}
-
 }
-
 WSejecutar(metodo, url, cuerpo:=""){
 	static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
     local rc:={}
