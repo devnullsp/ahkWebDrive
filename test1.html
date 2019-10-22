@@ -11,19 +11,28 @@
     </style>
 </head>
 <body>
-
-<select multiple>
-  <option value="volvo">Volvo</option>
-  <option value="saab">Saab</option>
-  <option value="opel">Opel</option>
-  <option value="audi">Audi</option>
-</select>
-<p>
-    <input type="radio" name="gender" value="male"> Male<br>
-    <input type="radio" name="gender" value="female"> Female</input><br>
-    <input type="radio" name="gender" value="other"> Other
-    
-</p>
-<input id="campo" value="texto"></input>
+<div id="total" name="nombreDiv1">
+    <select multiple>
+    <option id="opc1" value="volvo">Volvo</option>
+    <option value="saab">Saab</option>
+    <option value="opel">Opel</option>
+    <option value="audi">Audi</option>
+    </select>
+    <p>
+        <input type="radio" name="gender" value="male"> Male<br>
+        <input type="radio" name="gender" value="female"> Female</input><br>
+        <input type="radio" name="gender" value="other"> Other
+        
+    </p>
+    <input id="campo" value="texto"></input>
+    <button id="boton" onclick="alert('Close this alert!!!!')">msg</button>
+    <p>
+    <div id="borrar">
+        <p>
+            <b>este texto </b>se puede borrar......
+        </p>
+    </div>
+    </p>
+</div>
 </body>
 </html>

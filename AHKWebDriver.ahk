@@ -1,4 +1,4 @@
-#include jxon.ahk
+﻿#include jxon.ahk
 
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
@@ -40,7 +40,6 @@ msgbox % "url: " (e:=wd.url("file:///C:/PRG/Selenium/test1.html")) "`n" e.rc.raw
 /*
 msgbox % "element option: "   (e := wd.element(WDSession.XPath,"/html/body/select/option[1]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
 msgbox % "get selected (element): "   (f := e.getSelected()) "`n" f "`n" e.rc.raw
-*/
 msgbox % "input check: "   					(e := wd.element(WDSession.XPath,"/html/body/p/input[2]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
 msgbox % "get selected (element): " 		(f := e.getSelected())  "`n" e.rc.raw
 msgbox % "get attribute (value): "  		(f := e.getAttribute("name")) "`n" e.rc.raw
@@ -49,8 +48,32 @@ msgbox % "get property (value): "   		(f := e.getProperty("name")) "`n" e.rc.raw
 msgbox % "get property (esteNoExiste): "   	(f := e.getProperty("esteNoExiste")) "`n" e.rc.raw
 msgbox % "get CSS (color): "   				(f := e.getCSS("color")) "`n" e.rc.raw
 msgbox % "get text: "	  	 				(f := e.getText()) "`n" e.rc.raw
-msgbox % "input check campo: "  			(e := wd.element(WDSession.XPath,"//*[@id='campo']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "element xpath id=total: "  			(e := wd.element(WDSession.XPath,"//*[@id='total']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
 msgbox % "get text: "	  	 				(f := e.getText()) "`n" e.rc.raw
+msgbox % "element xpath id=opc1: "  			(e := wd.element(WDSession.XPath,"//*[@id='opc1']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get text: "	  	 				(f := e.getText()) "`n" e.rc.raw
+msgbox % "element xpath id=total: "  			(e := wd.element(WDSession.XPath,"//*[@id='total']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get name: "		  	 				(f := e.getName()) "`n" e.rc.raw
+msgbox % "get rect: "	  		 				(f := e.getRect()) "`n"  f.height " " f.width " " f.x " " f.y "`n" e.rc.raw
+msgbox % "get enabled: "	  	 				(f := e.getEnabled())  "`n" e.rc.raw
+msgbox % "element xpath id=boton: "  			(e := wd.element(WDSession.XPath,"//*[@id='boton']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "element click: "  					(f := e.click()) "`n" e.rc.raw
+msgbox % "element xpath id=borrar: "  			(e := wd.element(WDSession.XPath,"//*[@id='borrar']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get attribute (innerHTML): "  		(f := e.getAttribute("innerHTML")) "`n" e.rc.raw
+msgbox % "element clear: "  					(f := e.clear()) "`n" e.rc.raw
+*/
+msgbox % "element xpath id=campo: "  			(e := wd.element(WDSession.XPath,"//*[@id='campo']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
+msgbox % "get attribute (innerHTML): "  		(f := e.getAttribute("innerHTML")) "`n" e.rc.raw
+msgbox % "element clear: "  					(f := e.clear()) "`n" e.rc.raw
+msgbox % "element click (foco): "  				(f := e.click()) "`n" e.rc.raw
+msgbox % "element value poniendo texto: " 		(f := e.value("prueba"  "ñ"  WDSession.keys.Backspace chr(0x26d4) WDSession.keys.ArrowLeft " ")) "`n" e.rc.raw
+msgbox % "element screenshot: "  				(f := e.getScreenshot()) "`n" e.rc.raw
+Clipboard := f
+msgbox % "element value Ctrl+izq: " 			(f := e.value(WDSession.keys.Control WDSession.keys.ArrowLeft)) "`n" e.rc.raw
+msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.Control WDSession.keys.Shift WDSession.keys.End)) "`n" e.rc.raw
+msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.End)) "`n" e.rc.raw
+msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.Backspace)) "`n" e.rc.raw
+msgbox % "element value Ctrl+z: "  				(f := e.value(WDSession.keys.Control "Z")) "`n" e.rc.raw
 
 msgbox Delete session
 wd.delete()
@@ -64,6 +87,30 @@ class WDSession{
 	static PartialLinkTExt  := "partial link text"
 	static TagName			:= "tag name"
 	static XPath			:= "xpath"
+	static keys := {}
+		keys.Unidentified 	:= chr(0xE000)
+		keys.Cancel 		:= chr(0xE001)
+		keys.Help			:= chr(0xE002)
+		keys.Backspace 		:= chr(0xE003)
+		keys.Tab 			:= chr(0xE004)
+		keys.Clear 			:= chr(0xE005)
+		keys.Return 		:= chr(0xE006)
+		keys.Enter 			:= chr(0xE007)
+		keys.Shift			:= chr(0xE008)
+		keys.Control 		:= chr(0xE009)
+		keys.Alt 			:= chr(0xE00A)
+		keys.Pause 			:= chr(0xE00B)
+		keys.Escape 		:= chr(0xE00C)
+		keys.PageUp 		:= chr(0xE00E)
+		keys.PageDown 		:= chr(0xE00F)
+		keys.End 			:= chr(0xE010)
+		keys.Home 			:= chr(0xE011)
+		keys.ArrowLeft 		:= chr(0xE012)
+		keys.ArrowUp 		:= chr(0xE013)
+		keys.ArrowRight 	:= chr(0xE014)
+		keys.ArrowDown 		:= chr(0xE015)
+		keys.Insert 		:= chr(0xE016)
+		keys.Delete 		:= chr(0xE017)
 
 	;-- instance vars ---------------------------------
     sessionId := ""
@@ -72,78 +119,78 @@ class WDSession{
     __New(){
  	    local body := {}
         body.capabilities := {}
-        this.rc := WSejecutar("POST", this.prefijo "session",jxon_Dump(body) )
+        this.rc := WDSession.__ws("POST", this.prefijo "session",jxon_Dump(body) )
         this.sessionId := this.rc.isError ? "" : this.rc.value.sessionId
         return  this
     }
     url(url){
         local body := {}
         body.url := url
-        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/url", jxon_Dump(body))
+        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/url", jxon_Dump(body))
 		return this.rc.isError
     }
 	getUrl(){
-		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/url")
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/url")
 		return this.rc.value
 	}
 	back(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/back", "{}")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/back", "{}")
 		return this.rc.isError
 	}
 	forward(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/forward", "{}")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/forward", "{}")
 		return this.rc.isError
 	}
 	refresh(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/refresh", "{}")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/refresh", "{}")
 		return this.rc.isError
 	}
     delete(){
-        this.rc := WSejecutar("DELETE", this.prefijo "session/" this.sessionId)
+        this.rc := WDSession.__ws("DELETE", this.prefijo "session/" this.sessionId)
 		return this.rc.isError
     }
 	getTitle(){
-		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/title")
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/title")
 		return this.rc.value
 	}
 	getWindow(){
-		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/window")
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/window")
 		return this.rc.value
 	}
 	window(handle){
         local body := {}
         body.handle := handle
-        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window", jxon_Dump(body))
+        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window", jxon_Dump(body))
 		return this.rc.isError
     }
 	newWindow(type){
 		local body := {}
         body.type := (type = "") ? "tab" : type
-        this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/new", jxon_Dump(body))
+        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/new", jxon_Dump(body))
 		return this.rc.value.handle
 	}
 	closeWindow(){
-    	this.rc := WSejecutar("DELETE", this.prefijo "session/" this.sessionId "/window")
+    	this.rc := WDSession.__ws("DELETE", this.prefijo "session/" this.sessionId "/window")
 		return this.rc.isError
     }	
 	getWindowHandles(){
-		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/window/handles")
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/window/handles")
 		return this.rc.value
 	}
 	windowMaximize(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/maximize", "{}")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/maximize", "{}")
 		return this.rc.isError
 	}
 	windowMinimize(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/minimize", "{}")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/minimize", "{}")
 		return this.rc.isError
 	}
 	windowFullscreen(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/fullscreen", "{}")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/fullscreen", "{}")
 		return this.rc.isError
 	}
 	getWindowRect(){
-		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/window/rect")
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/window/rect")
 		return this.rc.value
 	}
 	windowRect(x:="", y:="", width:="", height:=""){
@@ -160,29 +207,29 @@ class WDSession{
 			if(height!="")
 				body.height := height
 		}
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/window/rect", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/rect", jxon_Dump(body))
 		return this.rc.isError
 	}
 	frame(id:=""){
 		local body := {}
 		if(id!="")
 			body.id := id
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/frame", jxon_Dump(body)) 
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/frame", jxon_Dump(body)) 
 		return this.rc.isError
 	}
 	frameParent(){
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/frame/parent", "{}")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/frame/parent", "{}")
 		return this.rc.isError
 	}
 	getElementActive(){
-		this.rc := WSejecutar("GET", this.prefijo "session/" this.sessionId "/element/active")
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/element/active")
 		if(this.rc.isError) 
 			return ""
 		return new WDSession.WebElement(this.rc.value, this)
 	}
 	element(selector, value){
 		local body := {using: selector, value: value }
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/element", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/element", jxon_Dump(body))
 		if(this.rc.isError) 
 			return ""
 		return new WDSession.WebElement(this.rc.value, this)
@@ -190,7 +237,7 @@ class WDSession{
 	elements(selector, value){
 		local body := {using: selector, value: value }
 		local list,i,k
-		this.rc := WSejecutar("POST", this.prefijo "session/" this.sessionId "/elements", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/elements", jxon_Dump(body))
 		if(this.rc.isError) 
 			return ""
 		list:=[]
@@ -207,61 +254,95 @@ class WDSession{
 			this.objSession := objSession
 		}
 		getSelected(){
-			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/selected")
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/selected")
 			if(this.rc.isError) 
 				return ""
 			return this.rc.value
 		}
 		getAttribute(name){
-			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/attribute/" name)
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/attribute/" name)
 			if(this.rc.isError) 
 				return ""
 			return this.rc.value
 		}
 		getProperty(name){
-			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/property/" name)
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/property/" name)
 			if(this.rc.isError) 
 				return ""
 			return this.rc.value
 		}
 		getCSS(propertyName){
-			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/css/" propertyName)
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/css/" propertyName)
 			if(this.rc.isError) 
 				return ""
 			return this.rc.value
 		}
 		getText(){
-			this.rc := WSejecutar("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/text")
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/text")
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
+		getName(){
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/name")
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
+		getRect(){
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/rect")
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		}
+		getEnabled(){
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/enabled")
+			if(this.rc.isError) 
+				return ""
+			return this.rc.value
+		} 
+		click(){
+			this.rc := WDSession.__ws("POST", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/click", "{}")
+			return this.rc.isError
+		}
+		clear(){
+			this.rc := WDSession.__ws("POST", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/clear", "{}")
+			return this.rc.isError
+		}
+		value(keys){
+			this.rc := WDSession.__ws("POST", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/value", jxon_Dump({text: keys}))
+			return this.rc.isError
+		}
+		getScreenshot(){
+			this.rc := WDSession.__ws("GET", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/screenshot")
 			if(this.rc.isError) 
 				return ""
 			return this.rc.value
 		}
 	}
+	__ws(metodo, url, cuerpo:=""){
+		static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
+		local rc:={}
+		WS_SERVIDOR.Open(metodo,url, false)
+		WS_SERVIDOR.setRequestHeader("Content-Type","application/json; charset=UTF-8")
+		WS_SERVIDOR.Send(cuerpo)
+		rc.status      := WS_SERVIDOR.Status
+		rc.isErrorWeb  := (WS_SERVIDOR.Status < 200 or WS_SERVIDOR.Status > 299)
+		rc.raw         := WS_SERVIDOR.ResponseText
+		rc.json        := ""
+		rc.isError     :=  rc.isErrorWeb
+		if(!rc.isErrorWeb){
+			rc.json    := jxon_Load(rc.raw)
+			rc.value   := rc.json.value
+			rc.isError := rc.value.hasKey("error")
+			if(rc.isError){
+				rc.error := rc.value.error
+				rc.message := rc.value.message
+			}
+		}
+		return rc
+	}
 }
-WSejecutar(metodo, url, cuerpo:=""){
-	static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
-    local rc:={}
-    WS_SERVIDOR.Open(metodo,url, false)
-    WS_SERVIDOR.setRequestHeader("Content-Type","application/json; charset=UTF-8")
-    WS_SERVIDOR.Send(cuerpo)
-    rc.status      := WS_SERVIDOR.Status
-    rc.isErrorWeb  := (WS_SERVIDOR.Status < 200 or WS_SERVIDOR.Status > 299)
-    rc.raw         := WS_SERVIDOR.ResponseText
-    rc.json        := ""
-    rc.isError     :=  rc.isErrorWeb
-    if(!rc.isErrorWeb){
-        rc.json    := jxon_Load(rc.raw)
-		rc.value   := rc.json.value
-        rc.isError := rc.value.hasKey("error")
-        if(rc.isError){
-            rc.error := rc.value.error
-            rc.message := rc.value.message
-        }
-    }
-    return rc
-}
-
-
 /*
 {"value":
     {
