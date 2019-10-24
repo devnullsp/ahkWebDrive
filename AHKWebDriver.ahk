@@ -1,10 +1,34 @@
 ﻿#include jxon.ahk
-a:={}
-a.b:="asdf"
-a.c:=["z"]
-msgbox % jxon_Dump(a)
 
-#include jxon.ahk
+procesaObj(a){
+	for k,e in a
+	{
+		if(IsObject(e))
+			if(e.HasKey(WDSession.WebElement.weID)){
+				a[k]:=new WDSession.WebElement(e, "sesion")
+			}else
+				procesaObj(e)
+	}
+}
+
+a:=["o1", {WDSession.WebElement.weID: "8888-13213-123-12313"}]
+procesaObj(a)
+for k,e in a
+{
+	if(e.uuid = WDSession.WebElement.weID){
+		msgbox % "encontraodo we!!!" k  " " e.ref
+	}
+}
+
+a:={valor: "o1", obj: {WDSession.WebElement.weID: "8888-13213-123-12313"}}
+procesaObj(a)
+for k,e in a
+{
+	if(e.uuid = WDSession.WebElement.weID){
+		msgbox % "encontraodo we!!!" k  " " e.ref
+	}
+}
+
 
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
@@ -80,8 +104,23 @@ msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.End)) "`
 msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.Backspace)) "`n" e.rc.raw
 msgbox % "element value Ctrl+z: "  				(f := e.value(WDSession.keys.Control "Z")) "`n" e.rc.raw
 msgbox % "get Source: "  		(f := wd.getSource()) "`n" wd.rc.raw
+msgbox % "execute sync (no retorno): "  (e := wd.executeSync("alerta(arguments[0])","")) "`n" wd.rc.raw
+msgbox % "execute sync (ret. elem): "   (e := wd.executeSync("return document.getElementById('total')","")) 
+															. "`nobj=" wd.rc.value.ref "`n" wd.rc.raw
+msgbox % "execute sync (ret. string): " (e := wd.executeSync("return 'datos'","")) "`n" wd.rc.value "`n" wd.rc.raw
+msgbox % "execute sync (ret. numero): " (e := wd.executeSync("return 5","")) "`n" wd.rc.value "`n" wd.rc.raw
+msgbox % "execute sync (ret. obj): "    (e := wd.executeSync("return {nombre: 'yo', ape: 'tu'}","")) 
+															. "`n" wd.rc.value.nombre " " wd.rc.value.ape "`n" wd.rc.raw
 */
-msgbox % "execute sync: "   (e := wd.executeSync("alerta(arguments[0])","")) "`n" wd.rc.raw
+ctrl:=wd.element(WDSession.XPath,"//*[@id='boton']")														
+msgbox % "execute sync args: "  
+			. ( e := wd.executeSync("alerta(arguments[0]+' '+arguments[1]+' '+arguments[2].obj); arguments[3].click() "
+									, ["parm1", 4, {obj: "valor"}, ctrl] ) ) 
+									;, ["parm1", 4, {obj: "valor"}, { WDSession.WebElement.weID: ctrl.ref}] ) ) 
+			. "`n" wd.rc.raw
+msgbox % "execute sync (multi elem): "   (e := wd.executeSync("return document.getElementsByTagName('option')","")) 
+															. "`nobj=" wd.rc.value.ref "`n" wd.rc.raw
+
 
 msgbox Delete session
 wd.delete()
@@ -261,21 +300,36 @@ class WDSession{
 	}
 	executeSync(script, args:=""){
 		local body := {}
+		for x in args
+			if(IsObject(args[x]))
+				if(args[x].uuid = WDSession.WebElement.weID)
+					args[x] := {WDSession.WebElement.weID: args[x].ref}
 		body.script := script
 		body.args:=(args="" || args=[]) ? ["default","default"] : args
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/sync", jxon_Dump(body)) 
+		if(IsObject(this.rc.value)){
+			for k,e in this.rc.value{
+				
+			}
+		}
+			if(this.rc.value.hasKey(WDSession.WebElement.weID))
+				this.rc.value := new WDSession.WebElement(this.rc.value, this.sessionId)
 		return this.rc.isError
 	}
 
-
-
+	__procObject(obj){
+		for k,e in obj
+			this.rc.value := new WDSession.WebElement(this.rc.value, this.sessionId)
+	}
 	;..............................................................................................................
 	class WebElement{
+		static weID := "element-6066-11e4-a52e-4f735466cecf"
+		uuid	   := WDSession.WebElement.weId
 		ref        := ""
 		objSession := ""
 		rc 		   := ""
 		__New(obj, objSession){
-			this.ref 		:= obj["element-6066-11e4-a52e-4f735466cecf"]
+			this.ref 		:= obj[WDSession.WebElement.weID]
 			this.objSession := objSession
 		}
 		getSelected(){
