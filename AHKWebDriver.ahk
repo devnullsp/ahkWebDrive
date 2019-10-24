@@ -1,4 +1,10 @@
 ﻿#include jxon.ahk
+a:={}
+a.b:="asdf"
+a.c:=["z"]
+msgbox % jxon_Dump(a)
+
+#include jxon.ahk
 
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
@@ -61,7 +67,6 @@ msgbox % "element click: "  					(f := e.click()) "`n" e.rc.raw
 msgbox % "element xpath id=borrar: "  			(e := wd.element(WDSession.XPath,"//*[@id='borrar']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
 msgbox % "get attribute (innerHTML): "  		(f := e.getAttribute("innerHTML")) "`n" e.rc.raw
 msgbox % "element clear: "  					(f := e.clear()) "`n" e.rc.raw
-*/
 msgbox % "element xpath id=campo: "  			(e := wd.element(WDSession.XPath,"//*[@id='campo']")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
 msgbox % "get attribute (innerHTML): "  		(f := e.getAttribute("innerHTML")) "`n" e.rc.raw
 msgbox % "element clear: "  					(f := e.clear()) "`n" e.rc.raw
@@ -74,6 +79,9 @@ msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.Control 
 msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.End)) "`n" e.rc.raw
 msgbox % "element value Ctrl+Shif+end: " 		(f := e.value(WDSession.keys.Backspace)) "`n" e.rc.raw
 msgbox % "element value Ctrl+z: "  				(f := e.value(WDSession.keys.Control "Z")) "`n" e.rc.raw
+msgbox % "get Source: "  		(f := wd.getSource()) "`n" wd.rc.raw
+*/
+msgbox % "execute sync: "   (e := wd.executeSync("alerta(arguments[0])","")) "`n" wd.rc.raw
 
 msgbox Delete session
 wd.delete()
@@ -245,6 +253,23 @@ class WDSession{
 			list.push(new WDSession.WebElement(this.rc.value[A_index], this))
 		return list
 	}
+	getSource(){
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/source")
+		if(this.rc.isError) 
+			return ""
+		return this.rc.value
+	}
+	executeSync(script, args:=""){
+		local body := {}
+		body.script := script
+		body.args:=(args="" || args=[]) ? ["default","default"] : args
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/sync", jxon_Dump(body)) 
+		return this.rc.isError
+	}
+
+
+
+	;..............................................................................................................
 	class WebElement{
 		ref        := ""
 		objSession := ""
