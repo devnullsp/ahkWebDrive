@@ -132,7 +132,6 @@ msgbox % "execute sync args: "
 msgbox % "execute sync (multi elem): "   (e := wd.executeSync("return document.getElementsByTagName('option')","")) 
 															. "`nobj=" wd.rc.value.ref "`n" wd.rc.raw 
 msgbox % dumpObj(wd.rc.value,"`t")															
-*/
 msgbox % "execute sync (multi, multi obj): "   (e := wd.execute("var r=confirm('mensaje'); return r;")) 
 													. "`n=" wd.rc.value "`n" wd.rc.raw 
 
@@ -143,11 +142,14 @@ msgbox % Jxon_Dump(wd.rc.value,,"`t")
 msgbox % "execute async (multi, multi obj): "   (e := wd.execute("return arguments[2]({options: document.getElementsByTagName('option'), buttons: document.getElementsByTagName('button')}) ","", WDSession.Async)) 
 															. "`nobj=" wd.rc.value.ref "`n" wd.rc.raw 
 msgbox % Jxon_Dump(wd.rc.value,,"`t")
-
-
-;msgbox % "execute async (obj): "   (e := wd.execute("return document","", WDSession.Async)) 
+msgbox % "execute async (obj): "   (e := wd.execute("return document","", WDSession.Async)) 
 															. "`nobj=" wd.rc.value.ref "`n" wd.rc.raw 
-;msgbox % Jxon_Dump(wd.rc.value)															
+msgbox % Jxon_Dump(wd.rc.value)															
+*/
+
+msgbox % "execute2: " (e := wd.execute2("alert('hola')")) "`n" wd.rc.raw 
+msgbox % "execute: " (e := wd.execute("alert(arguments[0])","",WDSession.Async)) "`n" wd.rc.raw 
+msgbox % "execute: " (e := wd.execute("alert('esto');arguments[0]();","",WDSession.Async)) "`n" wd.rc.raw 
 
 msgbox Delete session
 wd.delete()
@@ -328,28 +330,41 @@ class WDSession{
 		return this.rc.value
 	}
 	execute(script, args:="", sync:="sync"){
-		local body := {}
-		for x in args
-			if(IsObject(args[x]))
-				if(args[x].uuid = WDSession.WebElement.weID)
-					args[x] := {WDSession.WebElement.weID: args[x].ref}
+		local body:={}
+		local x
 		body.script := script
-		body.args:=(args="" || args=[]) ? ["default","default"] : args
+		if(args!=""){
+			for x in args
+				if(IsObject(args[x]))
+					if(args[x].uuid = WDSession.WebElement.weID)
+						args[x] := {WDSession.WebElement.weID: args[x].ref}
+			body.args:=args
+		}
+		msgbox % jxon_Dump(body)
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/" sync, jxon_Dump(body)) 
 		if(isObject(this.rc.value))
 			if(this.rc.value.HasKey(WDSession.WebElement.weID))
-					this.rc.value := new WDSession.WebElement(obj, this.sessionId)
+					this.rc.value := new WDSession.WebElement(obj, this)
 			else
 				this.__translateObj(this.rc.value)
 		return this.rc.isError
 	}
+	execute2(script){
+		a={"script": "{1}", "args": [ ]}
+		a:=format(a,script)
+		msgbox % a 
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/sync", a) 
+		return this.rc.isError
+	}
+
+	
 	__translateObj(obj){
 		local key, value
 		for key, value in obj
 		{
 			if(IsObject(value))
 				if(value.hasKey(WDSession.WebElement.weID)){
-					obj[key]:=new WDSession.WebElement(value, this.sessionId)
+					obj[key]:=new WDSession.WebElement(value, this)
 				}else
 					this.__translateObj(value)
 		}
