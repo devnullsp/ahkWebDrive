@@ -1,47 +1,5 @@
-﻿#include jxon.ahk
-/*
-procesaObj(a){
-	for k,e in a
-	{
-		if(IsObject(e))
-			if(e.HasKey(WDSession.WebElement.weID)){
-				a[k]:=new WDSession.WebElement(e, "sesion")
-			}else
-				procesaObj(e)
-	}
-}
-
-a:=["o1", {WDSession.WebElement.weID: "8888-13213-123-12313"}]
-procesaObj(a)
-for k,e in a
-{
-	if(e.uuid = WDSession.WebElement.weID){
-		msgbox % "encontraodo we!!!" k  " " e.ref
-	}
-}
-;---------------------------------------------------------------------
-a:={valor: "o1"
-			, obj: {WDSession.WebElement.weID: "2222-13213-123-12313"}
-			, otr: {parm1: "hola"
-			, parm2:{WDSession.WebElement.weID: "333333-13213-123-12313"}}}
-
-procesaObj(a)
-
-busca(a)
-
-busca(a){
-	for k,e in a
-	{
-		if(isobject(e))
-			if(e.uuid = WDSession.WebElement.weID){
-				msgbox % "encontraodo we!!!" k  " " e.ref
-			}else
-				busca(e)
-	}
-}
-
-*/
-
+﻿#noenv
+#include jxon.ahk
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
 wd := new WDSession()
@@ -78,7 +36,7 @@ msgbox % "elements: "   (e := wd.elements(WDSession.TagName,"Link")) "`n" e.Coun
 */
 e:=""
 f:=""
-msgbox % "url: " (e:=wd.url("file:///C:/PRG/Selenium/test1.html")) "`n" e.rc.raw
+;msgbox % "url: " (e:=wd.url("file:///C:/PRG/Selenium/test1.html")) "`n" e.rc.raw
 /*
 msgbox % "element option: "   (e := wd.element(WDSession.XPath,"/html/body/select/option[1]")) "`n" (e="") " -> " e.ref "`n" wd.rc.raw
 msgbox % "get selected (element): "   (f := e.getSelected()) "`n" f "`n" e.rc.raw
@@ -145,12 +103,31 @@ msgbox % Jxon_Dump(wd.rc.value,,"`t")
 msgbox % "execute async (obj): "   (e := wd.execute("return document","", WDSession.Async)) 
 															. "`nobj=" wd.rc.value.ref "`n" wd.rc.raw 
 msgbox % Jxon_Dump(wd.rc.value)															
+msgbox % "execute: sin args "		(e := wd.execute("alert('hola')")) "`n" wd.rc.raw 
+msgbox % "execute: 1 arg " 			(e := wd.execute("alert(arguments[0])",["valor"],WDSession.Sync)) "`n" wd.rc.raw 
+msgbox % "execute: async 0 args " 	(e := wd.execute("alert('esto');arguments[0]();","",WDSession.Async)) "`n" wd.rc.raw 
 */
-
-msgbox % "execute2: " (e := wd.execute2("alert('hola')")) "`n" wd.rc.raw 
-msgbox % "execute: " (e := wd.execute("alert(arguments[0])","",WDSession.Async)) "`n" wd.rc.raw 
-msgbox % "execute: " (e := wd.execute("alert('esto');arguments[0]();","",WDSession.Async)) "`n" wd.rc.raw 
-
+msgbox % "url: " (e:=wd.url("https://stackoverflow.com")) "`n" wd.rc.raw
+/*
+msgbox % "getCookie: _gat " 	(e := wd.getCookie("_gat")) "`n" wd.rc.value.domain "`n" wd.rc.raw
+msgbox % "cookie nombre: " 	(e := wd.cookie("nombre","gonzalo")) "`n" wd.rc.value.domain "`n" wd.rc.raw
+msgbox % "getCookie nombre: " 	(e := wd.getCookie("nombre")) "`n" wd.rc.value.domain "`n" wd.rc.raw
+msgbox % "delCookie nombre: " 	(e := wd.delCookie("nombre")) "`n" wd.rc.value.domain "`n" wd.rc.raw
+msgbox % "getCookie nombre: " 	(e := wd.getCookie("nombre")) "`n" wd.rc.value.domain "`n" wd.rc.raw
+msgbox % "getAllCookies: " 	(e := wd.getAllCookies()) "`n" wd.rc.value.count() "`n" wd.rc.raw
+msgbox % "delAllCookies nombre: " 	(e := wd.delAllCookies()) "`n" wd.rc.isError "`n" wd.rc.raw
+msgbox % "getAllCookies: " 	(e := wd.getAllCookies()) "`n" wd.rc.value.count() "`n" wd.rc.raw
+msgbox % "getScreenShot: " 	(e := wd.getScreenShot())  "`n" wd.rc.raw
+clipboard:=e
+*/
+; msgbox % "execute alert"		(e := wd.execute("alert('hola 1')")) "`n" wd.rc.raw 
+; msgbox % "alertAccept: "		(e := wd.alertAccept())  "`n" wd.rc.raw
+; msgbox % "execute alert"		(e := wd.execute("alert('hola 2')")) "`n" wd.rc.raw 
+; msgbox % "getAlertText: " 		(e := wd.getAlertText())  "`n" wd.rc.raw
+; msgbox % "alertDismiss: "		(e := wd.alertDismiss())  "`n" wd.rc.raw
+msgbox % "execute alert"		(e := wd.execute("prompt('pulse algo','valor')")) "`n" wd.rc.raw 
+msgbox % "alertText: "			(e := wd.alertText("texto cambiado"))  "`n" wd.rc.raw
+msgbox % "getAlertText: " 		(e := wd.getAlertText())  "`n" wd.rc.raw
 msgbox Delete session
 wd.delete()
 ExitAPP
@@ -331,33 +308,98 @@ class WDSession{
 	}
 	execute(script, args:="", sync:="sync"){
 		local body:={}
-		local x
+		local x,json
+		local vacio:=[]
 		body.script := script
-		if(args!=""){
+		if(args!="")
 			for x in args
 				if(IsObject(args[x]))
 					if(args[x].uuid = WDSession.WebElement.weID)
 						args[x] := {WDSession.WebElement.weID: args[x].ref}
-			body.args:=args
-		}
-		msgbox % jxon_Dump(body)
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/" sync, jxon_Dump(body)) 
+		body.args:=(args="") ? [] : args
+		json:=jxon_Dump(body)
+		if(args="") ; hay una errata en jxon por el que en vez de poner [] pone {} cuando es vacio
+			json:=RegExReplace(json, """args"":{}", """args"":[]")
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/" sync, json) 
 		if(isObject(this.rc.value))
 			if(this.rc.value.HasKey(WDSession.WebElement.weID))
-					this.rc.value := new WDSession.WebElement(obj, this)
+				this.rc.value := new WDSession.WebElement(obj, this)
 			else
 				this.__translateObj(this.rc.value)
 		return this.rc.isError
 	}
-	execute2(script){
-		a={"script": "{1}", "args": [ ]}
-		a:=format(a,script)
-		msgbox % a 
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/sync", a) 
+	getAllCookies(){
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/cookie")
+		if(this.rc.isError) 
+			return ""
+		return new WDSession.WebElement(this.rc.value, this)
+	}
+	getCookie(name){
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/cookie/" name)
+		if(this.rc.isError) 
+			return ""
+		return new WDSession.WebElement(this.rc.value, this)
+	}
+	cookie(name,value,path:="",domain:="",secure:="",httpOnly:="",expiry:=""){
+		local body:={}
+		cookieObj:={} 
+		cookieObj.name:=name
+		cookieObj.value:=value
+		if(isObject(path)){
+			for k,v in path
+				cookieObj[k]:=v
+		}else{
+			if(path!="") 
+				cookieObj.path:=path
+			if(domain!="") 
+				cookieObj.domain:=domain
+			if(secure!="") 
+				cookieObj.secure:=secure
+			if(httpOnly!="") 
+				cookieObj.httpOnly:=httpOnly
+			if(expiry!="") 
+				cookieObj.expiry:=expiry
+		}
+		body.cookie:=cookieObj
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/cookie", jxon_Dump(body))
+		return this.rc.isError
+	}
+	delCookie(name){
+		this.rc := WDSession.__ws("DELETE", this.prefijo "session/" this.sessionId "/cookie/" name)
+		return this.rc.isError
+	}
+	delAllCookies(){
+		this.rc := WDSession.__ws("DELETE", this.prefijo "session/" this.sessionId "/cookie")
+		return this.rc.isError
+	}
+	getScreenshot(){
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/screenshot")
+		if(this.rc.isError) 
+			return ""
+		return this.rc.value
+	}
+	alertDismiss(){
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/alert/dismiss", "{}")
+		return this.rc.isError
+	}
+	alertAccept(){
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/alert/accept", "{}")
+		return this.rc.isError
+	}
+	getAlertText(){
+		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/alert/text")
+		return this.rc.value
+	}
+	; error in chromedriver: https://bugs.chromium.org/p/chromedriver/issues/detail?id=1120
+	alertText(newText){
+		local body:={}
+		body.text:=newtext
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/alert/text", jxon_Dump(body))
 		return this.rc.isError
 	}
 
 	
+		
 	__translateObj(obj){
 		local key, value
 		for key, value in obj
@@ -465,7 +507,7 @@ class WDSession{
 			rc.value   := rc.json.value
 			rc.isError := rc.value.hasKey("error")
 			if(rc.isError){
-				rc.error := rc.value.error
+				rc.error   := rc.value.error
 				rc.message := rc.value.message
 			}
 		}
