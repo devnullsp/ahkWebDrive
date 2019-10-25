@@ -1,5 +1,6 @@
 ﻿#noenv
 #include jxon.ahk
+
 fileread lv, %A_AppData%\..\Local\Google\Chrome\User Data\Last version
 
 wd := new WDSession()
@@ -106,9 +107,7 @@ msgbox % Jxon_Dump(wd.rc.value)
 msgbox % "execute: sin args "		(e := wd.execute("alert('hola')")) "`n" wd.rc.raw 
 msgbox % "execute: 1 arg " 			(e := wd.execute("alert(arguments[0])",["valor"],WDSession.Sync)) "`n" wd.rc.raw 
 msgbox % "execute: async 0 args " 	(e := wd.execute("alert('esto');arguments[0]();","",WDSession.Async)) "`n" wd.rc.raw 
-*/
 msgbox % "url: " (e:=wd.url("https://stackoverflow.com")) "`n" wd.rc.raw
-/*
 msgbox % "getCookie: _gat " 	(e := wd.getCookie("_gat")) "`n" wd.rc.value.domain "`n" wd.rc.raw
 msgbox % "cookie nombre: " 	(e := wd.cookie("nombre","gonzalo")) "`n" wd.rc.value.domain "`n" wd.rc.raw
 msgbox % "getCookie nombre: " 	(e := wd.getCookie("nombre")) "`n" wd.rc.value.domain "`n" wd.rc.raw
@@ -119,15 +118,22 @@ msgbox % "delAllCookies nombre: " 	(e := wd.delAllCookies()) "`n" wd.rc.isError 
 msgbox % "getAllCookies: " 	(e := wd.getAllCookies()) "`n" wd.rc.value.count() "`n" wd.rc.raw
 msgbox % "getScreenShot: " 	(e := wd.getScreenShot())  "`n" wd.rc.raw
 clipboard:=e
-*/
-; msgbox % "execute alert"		(e := wd.execute("alert('hola 1')")) "`n" wd.rc.raw 
-; msgbox % "alertAccept: "		(e := wd.alertAccept())  "`n" wd.rc.raw
-; msgbox % "execute alert"		(e := wd.execute("alert('hola 2')")) "`n" wd.rc.raw 
-; msgbox % "getAlertText: " 		(e := wd.getAlertText())  "`n" wd.rc.raw
-; msgbox % "alertDismiss: "		(e := wd.alertDismiss())  "`n" wd.rc.raw
+ msgbox % "execute alert"		(e := wd.execute("alert('hola 1')")) "`n" wd.rc.raw 
+ msgbox % "alertAccept: "		(e := wd.alertAccept())  "`n" wd.rc.raw
+ msgbox % "execute alert"		(e := wd.execute("alert('hola 2')")) "`n" wd.rc.raw 
+ msgbox % "getAlertText: " 		(e := wd.getAlertText())  "`n" wd.rc.raw
+ msgbox % "alertDismiss: "		(e := wd.alertDismiss())  "`n" wd.rc.raw
 msgbox % "execute alert"		(e := wd.execute("prompt('pulse algo','valor')")) "`n" wd.rc.raw 
 msgbox % "alertText: "			(e := wd.alertText("texto cambiado"))  "`n" wd.rc.raw
 msgbox % "getAlertText: " 		(e := wd.getAlertText())  "`n" wd.rc.raw
+*/
+msgbox % "url: " (e:=wd.url("file:///C:/PRG/Selenium/test1.html")) "`n" e.rc.raw
+msgbox % "get window handles 1: " wd.getWindowHandles() "`n" wd.rc.value.count() "`n"  wd.rc.raw
+msgbox % "get window handles 2: " wd.getWindowHandles() "`n" wd.rc.value.count() "`n"  wd.rc.raw
+msgbox % "get window handles 3: " wd.getWindowHandles() "`n" wd.rc.value.count() "`n"  wd.rc.raw
+
+
+
 msgbox Delete session
 wd.delete()
 ExitAPP
@@ -265,12 +271,28 @@ class WDSession{
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/rect", jxon_Dump(body))
 		return this.rc.isError
 	}
+	frame("")
+	frame("123")
+	frame({uuid: "pepe", ref:"adfafjklñasdfjklñasdfjk"})
+	frame("resto posibilidades")
 	frame(id:=""){
-		local body := {}
-		if(id!="")
-			body.id := id
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/frame", jxon_Dump(body)) 
-		return this.rc.isError
+		local body := "{""id"": "
+		if(id=""){
+			body .= "null}"
+		}else if(RegExMatch("12","\d+")){
+				body .= id "}"
+			  }else	if(isObject(id)){
+				 		MSGBOX OBJ
+						;if(id.uuid = WDSession.WebElement.weID)
+						if(id.uuid = "pepe")
+							body .= "{""" id.uuid """: """ id.ref """}}"
+							;body .= "{""" WDSession.WebElement.weID """: """ id.ref """}}"
+					}
+					else
+						body .= """" . id . """}"
+		msgbox % body
+;		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/frame", body) 
+;		return this.rc.isError
 	}
 	frameParent(){
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/frame/parent", "{}")
@@ -398,8 +420,8 @@ class WDSession{
 		return this.rc.isError
 	}
 
-	
-		
+
+
 	__translateObj(obj){
 		local key, value
 		for key, value in obj

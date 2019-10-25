@@ -1,7 +1,7 @@
 global stop:= false
 
 ^F5::
-loop 3000
+loop 750
 {
 	IF(STOP){
 		stop:=false
@@ -12,6 +12,7 @@ loop 3000
 	send {Q up}
 	Sleep 100
 }
+return
 
 ^F9::
 ExitApp
