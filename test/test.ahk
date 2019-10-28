@@ -1,4 +1,3 @@
-msgbox % A_WorkingDir " " A_ScriptDir
 #noenv
 #include AHKWebDriver.ahk
 
@@ -10,8 +9,26 @@ if(wd.rc.isError){
     ExitApp
 }
 
+
+; wd.url("https://autohotkey.com")
+; wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a").click()
+
+
+;wd.url("https://autohotkey.com")
+; click over documentation
+; we := wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a")
+; msgbox % wd.rc.raw
+; wd.execute("arguments[0].click();",[ we ])
+;:wd.execute("arguments[0].boton.click(); alert('arguments[0].datos')",[{datos:"Closeme before continue!", boton: we}])
+
+wd.url("file:///" A_ScriptDir "/test1.html")
+we := wd.element(WDSession.XPath,"//*[@id=""botonMsg""]")
+wd.execute("alerta(arguments[0].datos,arguments[0].boton)",[{datos:"Closeme before continue!", boton: we}])
+msgbox % wd.isError " " wd.error " " wd.message "`n" wd.rc.raw
+
+ msgbox pause
+
 /*
-wd.url("https://autohotkey.com")
 msgbox % "get url: " 			wd.getUrl()
 msgbox % "back: " 				wd.back()
 msgbox % "forward: " 			wd.forward() 
@@ -141,12 +158,11 @@ msgbox % "get body (innerHTML): "  (f := e.getProperty("innerHTML")) "`n" e.rc.r
 msgbox % "frame parent: "  	 (e := wd.frameParent()) "`n" wd.rc.raw
 msgbox % "get body: "  (e := wd.element(WDSession.TagName,"body")) "`n" wd.rc.raw
 msgbox % "get body (innerHTML): " (f := e.getProperty("innerHTML")) "`n" e.rc.raw
-*/
 msgbox % "url: " (e:=wd.url("file:///" A_ScriptDir "/test1.html")) "`n" e.rc.raw
 msgbox % "frame 1: "  	 (e := wd.frame(0)) "`n" wd.rc.raw
 msgbox % "get body: "    (e := wd.element(WDSession.TagName,"body")) "`n" wd.rc.raw
 msgbox % "get body (innerHTML): "  (f := e.getProperty("innerHTML")) "`n" e.rc.raw
-
+*/
 
 msgbox Delete session
 wd.delete()

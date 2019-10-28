@@ -1,5 +1,5 @@
 ﻿#noenv
-#include jxon.ahk
+#include jxonMod.ahk
 
 ;Este objeto corresponde a la sesion.
 class WDSession{
@@ -143,8 +143,8 @@ class WDSession{
 			body .= "null}"
 		}else if(RegExMatch(id,"^\d+$")){
 				body .= id "}"
-			  }else	if(isObject(id) && id.uuid = WDSession.WebElement.weID){
-						body .= "{""" WDSession.WebElement.weID """: """ id.ref """}}"
+			  }else	if(isObject(id) && id.uuid = WDSession.WDElement.weID){
+						body .= "{""" WDSession.WDElement.weID """: """ id.ref """}}"
 					}
 					else
 						body .= """" id """}"
@@ -160,14 +160,14 @@ class WDSession{
 		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/element/active")
 		if(this.rc.isError) 
 			return ""
-		return new WDSession.WebElement(this.rc.value, this)
+		return new WDSession.WDElement(this.rc.value, this)
 	}
 	element(selector, value){
 		local body := {using: selector, value: value }
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/element", jxon_Dump(body))
 		if(this.rc.isError) 
 			return ""
-		return new WDSession.WebElement(this.rc.value, this)
+		return new WDSession.WDElement(this.rc.value, this)
 	}
 	elements(selector, value){
 		local body := {using: selector, value: value }
@@ -177,7 +177,7 @@ class WDSession{
 			return ""
 		list:=[]
 		loop % this.rc.value.Count()
-			list.push(new WDSession.WebElement(this.rc.value[A_index], this))
+			list.push(new WDSession.WDElement(this.rc.value[A_index], this))
 		return list
 	}
 	getSource(){
@@ -188,22 +188,35 @@ class WDSession{
 	}
 	execute(script, args:="", sync:="sync"){
 		local body:={}
-		local x,json
+		local x,json,i
 		local vacio:=[]
 		body.script := script
+		for x,i in args
+			if(A_index = 1 && x != 1){
+				this.rc := {}
+				this.isError := true
+				this.isErrorWeb:=false
+				this.error := "wrong parameter"
+				this.message := "Parameter args need to be array"
+				return this.isError
+			}
+			else
+				continue
 		if(args!="")
 			for x in args
 				if(IsObject(args[x]))
-					if(args[x].uuid = WDSession.WebElement.weID)
-						args[x] := {WDSession.WebElement.weID: args[x].ref}
+					if(args[x].uuid = WDSession.WDElement.weID)
+						args[x] := {WDSession.WDElement.weID: args[x].ref}
+					else
+						this.__dumpObj(args[x])				
 		body.args:=(args="") ? [] : args
 		json:=jxon_Dump(body)
 		if(args="") ; hay una errata en jxon por el que en vez de poner [] pone {} cuando es vacio
 			json:=RegExReplace(json, """args"":{}", """args"":[]")
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/" sync, json) 
 		if(isObject(this.rc.value))
-			if(this.rc.value.HasKey(WDSession.WebElement.weID))
-				this.rc.value := new WDSession.WebElement(obj, this)
+			if(this.rc.value.HasKey(WDSession.WDElement.weID))
+				this.rc.value := new WDSession.WDElement(obj, this)
 			else
 				this.__translateObj(this.rc.value)
 		return this.rc.isError
@@ -212,13 +225,13 @@ class WDSession{
 		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/cookie")
 		if(this.rc.isError) 
 			return ""
-		return new WDSession.WebElement(this.rc.value, this)
+		return new WDSession.WDElement(this.rc.value, this)
 	}
 	getCookie(name){
 		this.rc := WDSession.__ws("GET", this.prefijo "session/" this.sessionId "/cookie/" name)
 		if(this.rc.isError) 
 			return ""
-		return new WDSession.WebElement(this.rc.value, this)
+		return new WDSession.WDElement(this.rc.value, this)
 	}
 	cookie(name,value,path:="",domain:="",secure:="",httpOnly:="",expiry:=""){
 		local body:={}
@@ -278,15 +291,26 @@ class WDSession{
 		return this.rc.isError
 	}
 
-
+	__dumpObj(obj){
+		local key, value
+		for key, value in obj
+		{
+			if(isObject(value)){
+				if( value.uuid=WDSession.WDElement.weID )
+					obj[key] := {WDSession.WDElement.weID: value.ref}
+				else
+					this.__dumpObj(value)
+			}
+		}
+	}
 
 	__translateObj(obj){
 		local key, value
 		for key, value in obj
 		{
 			if(IsObject(value))
-				if(value.hasKey(WDSession.WebElement.weID)){
-					obj[key]:=new WDSession.WebElement(value, this)
+				if(value.hasKey(WDSession.WDElement.weID)){
+					obj[key]:=new WDSession.WDElement(value, this)
 				}else
 					this.__translateObj(value)
 		}
@@ -294,14 +318,14 @@ class WDSession{
 
 
 	;..............................................................................................................
-	class WebElement{
+	class WDElement{
 		static weID := "element-6066-11e4-a52e-4f735466cecf"
-		uuid	   := WDSession.WebElement.weId
+		uuid	   := WDSession.WDElement.weId
 		ref        := ""
 		objSession := ""
 		rc 		   := ""
 		__New(obj, objSession){
-			this.ref 		:= obj[WDSession.WebElement.weID]
+			this.ref 		:= obj[WDSession.WDElement.weID]
 			this.objSession := objSession
 		}
 		getSelected(){
@@ -371,6 +395,8 @@ class WDSession{
 			return this.rc.value
 		}
 	}
+
+	;--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	__ws(metodo, url, cuerpo:=""){
 		static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
 		local rc:={}
@@ -394,7 +420,7 @@ class WDSession{
 		return rc
 	}
 }
-/*
+/* sample chorme capabilities
 {"value":
     {
         "capabilities":{

@@ -2,7 +2,8 @@
 <html>
 <head>
     <script>
-        function alerta(msg){
+        function alerta(msg,obj){
+            obj.click()
             alert('mensaje: '+msg)
         }
     </script>
@@ -30,8 +31,7 @@
         
     </p>
     <input id="campo" value="texto"></input>
-    <button id="boton" onclick="alert('Close this alert!!!!')">msg</button>
-    <button id="boton" onclick="walert('Close this alert!!!!')">msg</button>
+    <button id="boton" onclick="alerta('Close this alert!!!!', document.getElementById('botonMsg'))">msg</button>
     <p><a href="https://www.w3schools.com" target="_blank">Visit W3Schools.com!</a></p>
     <p>
     <div id="borrar">
@@ -40,6 +40,10 @@
         </p>
     </div>
     </p>
+    <button id="botonMsg" onclick="document.getElementById('divMsg').innerHTML='esto es un mensaje'">msg</button>
+    <div id="divMsg">
+        ...
+    </div>
     <div>
     <iframe src='test2.html' id='frame1'></iframe>
     </div>
