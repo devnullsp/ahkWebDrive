@@ -1,3 +1,4 @@
+Q
 #noenv
 #include AHKWebDriver.ahk
 
