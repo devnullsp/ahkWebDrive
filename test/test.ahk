@@ -1,4 +1,13 @@
-Q
+﻿^f5::
+LOOP 700
+{
+	SEND {Q DOWN}
+	SLEEP 100
+	SEND {Q UP}
+	SLEEP 100
+}
+RETURN
+
 #noenv
 #include AHKWebDriver.ahk
 

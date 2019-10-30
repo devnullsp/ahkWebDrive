@@ -12,16 +12,16 @@ Is a Autohotkey native web client protocol.
 
 __Url API definition:__ https://w3c.github.io/webdriver
 
-this V1.0 inlude all functions but no actions, im working in this api.
+this V1.0 inlude all functions but no actions, I'm working in this api.
 
 Rename maping between W3C api and AHKWebSession:
 
 They are only two objects:
 
-- __WDSession__ representing one connection to WebDriver driver, attributes and functions
-- __WDSession.WDElement__ wraping one Web Element attributes and their functions
+- __WDSession__ representing one connection to WebDriver driver, attributes and functions.
+- __WDSession.WDElement__ wraping one Web Element attributes and their functions.
 
-WDSession.WDElement are not require to construct explicity (i think).
+WDSession.WDElement are not require to construct explicity (I think).
 
 The functions, defined by W3Cm, are organized by this two objects and the map is (in general):
 
@@ -32,15 +32,15 @@ The functions, defined by W3Cm, are organized by this two objects and the map is
 
 ## Using
 
-First you need download one webdriver midleware for your browser (and version).
+First you need to download one webdriver midleware for your browser (and version).
 - Google Chorme: https://chromedriver.chromium.org/
 - Mozilla: https://github.com/mozilla/geckodriver/releases
 - IExplorer: https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver
 - Edge: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/#downloads
 
-Run it. Read webdriver documentation to know what port its open and other run parameters if you need.
+Run it. Read webdriver documentation to know what port it's open and other things that you might need like running parameters, if needed.
 
-This sample show the minimun code need for get one connection. Webdriver its open in localhost and port 9515 (standard for Google Chrome WebDrive), finally you delete the session for disconnect.
+This sample show the minimun code needed to get one connection. Webdriver it's open in localhost and port 9515 (standard for Google Chrome WebDrive), finally you delete the session to disconnect.
 
 ```
 #include AHKWebDriver.ahk
@@ -54,25 +54,27 @@ if(wd.rc.isError){
 wd.delete()
 ```
 
-All time, when you execute one call to WDSession, they are one object storing all data to know what is doing:
+Always, when you execute one WDSession call, it returns with one object containing all data of the current status:
 
-__wd.rc__ its one object maping all data returning:
+__wd.rc__ this is the object.
 
-most important:
-- __wd.rc.isError__: true/false if they are one 
+Its attributes are:
+
+The more importants are:
+- __wd.rc.isError__: true/false if there is one 
 error.
-- __wd.rc.value__: response object
+- __wd.rc.value__: the true asking data.
 
 for debug or extend information:
 
-- __wd.rc.status__: http status from webdriver.
-- __wd.rc.isErrorWeb__: true/false if they are error communicating with webdriver.
-- __wd.rc.raw__: raw data returning from webdriver.
+- __wd.rc.status__: http status from the webdriver.
+- __wd.rc.isErrorWeb__: true/false if there is an error communicating with the webdriver.
+- __wd.rc.raw__: raw data returning from the webdriver.
 - __wd.rc.json__: json from wd.rc.raw.
-- __wd.rc.error__: if isError this is the error text.
-- __wd.rc.message__: if isError this is the error message text.
+- __wd.rc.error__: if isError = true, this is its text.
+- __wd.rc.message__: if isError = true, this is the error's message text.
 
-One time you are connected and get one WDSession, you would use the api, for example click documentation link in autohotkey page:
+One time you are connected to and have one WDSession, it's then, when u can call the api. For example, click the documentation link in the autohotkey page:
 
 ```
 ; get Session
@@ -83,8 +85,8 @@ wd.url("https://autohotkey.com")
 wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a").click()
 ```
 
-This demostrate the use of element object in javascript call
-parameters:
+This, the second code, shows the use of element object as a parameter in a javascript call:
+
 ```
 ; get Session
 wd := new WDSession("http://localhost:9515")
@@ -95,7 +97,7 @@ we := wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div
 wd.execute("arguments[0].click()",[we])) 
 ```
 
-One more, plus complex. Using an element object into other general object. This example move to Document page and show one alert (but not in this order ;) ).
+In the end, one more complex. Pushing an element object into another general object and using it as a parameter in a Javascript call.
 
 ```
 ; get Session
@@ -106,4 +108,8 @@ wd.url("https://autohotkey.com")
 we := wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a")
 wd.execute("arguments[0].boton.click(); alert('arguments[0].datos')",[{datos:"Close me before continue!", boton: we}])
 ```
+> __The API call documentation is a WIP (Work In Progress)__
 
+Regards,
+
+Juan Gonzalo de Silva Medina.

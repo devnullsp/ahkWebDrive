@@ -114,10 +114,12 @@ Jxon_Load(ByRef src, args*)
 			; in v1.1, true,false,A_PtrSize,A_IsUnicode,A_Index,A_EventInfo,
 			; SOMETIMES return strings due to certain optimizations. Since it
 			; is just 'SOMETIMES', numerify to be consistent w/ v2.0-a
+;- GSM ----------- MODIFIED FROM ORIGINAL -----------------------------------------			
 				else if (val == "true" || val == "false")
 					val := %val% + 0
 					;val := %value% + 0
-				
+;- GSM ------------ MODIFIED FROM ORIGINAL -----------------------------------------
+
 			; AHK_H has built-in null, can't do 'val := %value%' where value == "null"
 			; as it would raise an exception in AHK_H(overriding built-in var)
 				else if (val == "null")
