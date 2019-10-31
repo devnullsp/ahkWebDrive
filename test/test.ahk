@@ -1,12 +1,12 @@
-﻿^f5::
-LOOP 700
-{
-	SEND {Q DOWN}
-	SLEEP 100
-	SEND {Q UP}
-	SLEEP 100
-}
-RETURN
+﻿; ^f5::
+; LOOP 700
+; {
+; 	SEND {Q DOWN}
+; 	SLEEP 100
+; 	SEND {Q UP}
+; 	SLEEP 100
+; }
+; RETURN
 
 #noenv
 #include AHKWebDriver.ahk
@@ -20,16 +20,15 @@ if(wd.rc.isError){
 }
 
 
-; wd.url("https://autohotkey.com")
-; wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a").click()
+ wd.url("https://autohotkey.com")
+ wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a").click()
 
 
-;wd.url("https://autohotkey.com")
-; click over documentation
-; we := wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a")
-; msgbox % wd.rc.raw
-; wd.execute("arguments[0].click();",[ we ])
-;:wd.execute("arguments[0].boton.click(); alert('arguments[0].datos')",[{datos:"Closeme before continue!", boton: we}])
+wd.url("https://autohotkey.com")
+ we := wd.element(WDSession.XPath,"//*[@id=""menu-0""]/div/div/div/div[3]/nav/div/ul/li[2]/a")
+ msgbox % wd.rc.raw
+ wd.execute("arguments[0].click();",[ we ])
+wd.execute("arguments[0].boton.click(); alert('arguments[0].datos')",[{datos:"Closeme before continue!", boton: we}])
 
 wd.url("file:///" A_ScriptDir "/test1.html")
 we := wd.element(WDSession.XPath,"//*[@id=""botonMsg""]")
@@ -64,6 +63,8 @@ msgbox % "element: "   (e := wd.element(WDSession.CSS,"#downloadLink")) "`n" (e=
 msgbox % "elements: "   (e := wd.elements(WDSession.TagName,"Link")) "`n" e.Count() " -> " e[1].ref "`n" wd.rc.raw
 */
 e:=""
+
+
 f:=""
 ;msgbox % "url: " (e:=wd.url("file:///C:/PRG/Selenium/test1.html")) "`n" e.rc.raw
 /*

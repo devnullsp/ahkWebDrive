@@ -1,7 +1,6 @@
 ﻿#noenv
-#include jxonMod.ahk
+#include json.ahk
 
-;Este objeto corresponde a la sesion.
 class WDSession{
 	;-- Selectors -------------------------------------
 	static CSS				:= "css selector"
@@ -42,18 +41,23 @@ class WDSession{
     sessionId := ""
     prefijo   := ""
     rc        := ""
-    __New(location:="http://localhost:9515/"){
+    __New(location:="http://localhost:9515/", capabilities:=""){
  	    local body := {}
-        body.capabilities := {}
+		 if(capabilities != ""){
+        	body.capabilities := capabilities
+			body := JSON.Stringify(body)
+		 }
+		else 
+			body := "{""capabilities"":{}}"
 		this.prefijo:=location
-        this.rc := WDSession.__ws("POST", this.prefijo "session",jxon_Dump(body) )
+        this.rc := WDSession.__ws("POST", this.prefijo "session",body )
         this.sessionId := this.rc.isError ? "" : this.rc.value.sessionId
         return  this
     }
     url(url){
         local body := {}
         body.url := url
-        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/url", jxon_Dump(body))
+        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/url", JSON.Stringify(body))
 		return this.rc.isError
     }
 	getUrl(){
@@ -87,13 +91,13 @@ class WDSession{
 	window(handle){
         local body := {}
         body.handle := handle
-        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window", jxon_Dump(body))
+        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window", JSON.Stringify(body))
 		return this.rc.isError
     }
 	newWindow(type){
 		local body := {}
         body.type := (type = "") ? "tab" : type
-        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/new", jxon_Dump(body))
+        this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/new", JSON.Stringify(body))
 		return this.rc.value.handle
 	}
 	closeWindow(){
@@ -134,7 +138,7 @@ class WDSession{
 			if(height!="")
 				body.height := height
 		}
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/rect", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/rect", JSON.Stringify(body))
 		return this.rc.isError
 	}
 	frame(id:=""){
@@ -148,7 +152,6 @@ class WDSession{
 					}
 					else
 						body .= """" id """}"
-		msgbox % body
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/frame", body) 
 		return this.rc.isError
 	}
@@ -164,7 +167,7 @@ class WDSession{
 	}
 	element(selector, value){
 		local body := {using: selector, value: value }
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/element", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/element", JSON.Stringify(body))
 		if(this.rc.isError) 
 			return ""
 		return new WDSession.WDElement(this.rc.value, this)
@@ -172,7 +175,7 @@ class WDSession{
 	elements(selector, value){
 		local body := {using: selector, value: value }
 		local list,i,k
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/elements", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/elements", JSON.Stringify(body))
 		if(this.rc.isError) 
 			return ""
 		list:=[]
@@ -188,32 +191,20 @@ class WDSession{
 	}
 	execute(script, args:="", sync:="sync"){
 		local body:={}
-		local x,json,i
-		local vacio:=[]
+		local x,i
 		body.script := script
-		for x,i in args
-			if(A_index = 1 && x != 1){
-				this.rc := {}
-				this.isError := true
-				this.isErrorWeb:=false
-				this.error := "wrong parameter"
-				this.message := "Parameter args need to be array"
-				return this.isError
-			}
-			else
-				continue
-		if(args!="")
+		if(args="") 
+			args:=[]
+		else
 			for x in args
-				if(IsObject(args[x]))
+				if(IsObject(args[x])){
 					if(args[x].uuid = WDSession.WDElement.weID)
 						args[x] := {WDSession.WDElement.weID: args[x].ref}
 					else
 						this.__dumpObj(args[x])				
-		body.args:=(args="") ? [] : args
-		json:=jxon_Dump(body)
-		if(args="") ; hay una errata en jxon por el que en vez de poner [] pone {} cuando es vacio
-			json:=RegExReplace(json, """args"":{}", """args"":[]")
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/" sync, json) 
+				}
+		body.args:=args
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/execute/" sync, JSON.Stringify(body)) 
 		if(isObject(this.rc.value))
 			if(this.rc.value.HasKey(WDSession.WDElement.weID))
 				this.rc.value := new WDSession.WDElement(obj, this)
@@ -254,7 +245,7 @@ class WDSession{
 				cookieObj.expiry:=expiry
 		}
 		body.cookie:=cookieObj
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/cookie", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/cookie", JSON.Stringify(body))
 		return this.rc.isError
 	}
 	delCookie(name){
@@ -287,7 +278,7 @@ class WDSession{
 	alertText(newText){
 		local body:={}
 		body.text:=newtext
-		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/alert/text", jxon_Dump(body))
+		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/alert/text", JSON.Stringify(body))
 		return this.rc.isError
 	}
 
@@ -385,7 +376,7 @@ class WDSession{
 			return this.rc.isError
 		}
 		value(keys){
-			this.rc := WDSession.__ws("POST", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/value", jxon_Dump({text: keys}))
+			this.rc := WDSession.__ws("POST", this.objSession.prefijo "session/" this.objSession.sessionId "/element/" this.ref "/value", JSON.Stringify({text: keys}))
 			return this.rc.isError
 		}
 		getScreenshot(){
@@ -400,6 +391,7 @@ class WDSession{
 	__ws(metodo, url, cuerpo:=""){
 		static WS_SERVIDOR := ComObjCreate("Msxml2.XMLHTTP")
 		local rc:={}
+		msgbox % metodo " " url "`ncuerpo: " cuerpo
 		WS_SERVIDOR.Open(metodo,url, false)
 		WS_SERVIDOR.setRequestHeader("Content-Type","application/json; charset=UTF-8")
 		WS_SERVIDOR.Send(cuerpo)
@@ -409,7 +401,7 @@ class WDSession{
 		rc.json        := ""
 		rc.isError     :=  rc.isErrorWeb
 		if(!rc.isErrorWeb){
-			rc.json    := jxon_Load(rc.raw)
+			rc.json    := JSON.Parse(rc.raw)
 			rc.value   := rc.json.value
 			rc.isError := rc.value.hasKey("error")
 			if(rc.isError){
@@ -443,3 +435,70 @@ class WDSession{
     }
 }
 */
+
+
+ObjDump(obj,ByRef var:="",mode:=0){
+  If IsObject(var){ ; FileAppend mode
+    If FileExist(obj){
+      FileDelete,%obj%
+      If ErrorLevel
+        return
+    }
+    f:=FileOpen(obj,"rw-rwd","CP0"),VarSetCapacity(v,sz:=RawObjectSize(var,mode)+8,0)
+    ,RawObject(var,NumPut(sz-8,0+(ptr:=&v),"Int64"),mode),count:=sz//65536
+    Loop % count
+      f.RawWrite(ptr+0,65536),ptr+=65536
+    return sz,f.RawWrite(ptr+0,Mod(sz,65536)),f.Close()
+  } else if !IsByRef(var)
+		return RawObjectSize(obj,mode)+8
+  else return sz,VarSetCapacity(var,sz:=RawObjectSize(obj,mode)+8,0),RawObject(obj,NumPut(sz-8,&var,"Int64"),mode)
+}
+RawObject(obj,addr,buf:=0,objects:=0){
+  ; Type.Enum:    Char.1 UChar.2 Short.3 UShort.4 Int.5 UInt.6 Int64.7 UInt64.8 Double.9 String.10 Object.11
+  ; Negative for keys and positive for values
+  if !objects
+    objects:={(""):0,(obj):0}
+  else objects[obj]:=(++objects[""])
+  for k,v in obj
+  { ; 9 = Int64 for size and Char for type
+    If !(kIsString:=0)&&IsObject(k){
+      If objects.HasKey(k)
+        NumPut(-12,addr+0,"Char"),NumPut(objects[k],addr+1,"Int64"),addr+=9
+      else NumPut(-11,addr+0,"Char"),NumPut(sz:=RawObjectSize(k,buf),addr+1,"Int64"),RawObject(k,addr+9,buf,objects),addr+=sz+9
+    }else if (k+0=""||k ""!=k+0||k~="\s")
+      kIsString:=true,NumPut(-10,addr+0,"Char"),NumPut(sz:=StrPut(k,addr+9)*2,addr+1,"Int64"),addr+=sz+9
+    else NumPut( InStr(k,".")?-9:k>4294967295?-8:k>65535?-6:k>255?-4:k>-1?-2:k>-129?-1:k>-32769?-3:k>-2147483649?-5:-7,addr+0,"Char")
+        ,NumPut(k,addr+1,InStr(k,".")?"Double":k>4294967295?"UInt64":k>65535?"UInt":k>255?"UShort":k>-1?"UChar":k>-129?"Char":k>-32769?"Short":k>-2147483649?"Int":"Int64")
+        ,addr+=InStr(k,".")||k>4294967295?9:k>65535?5:k>255?3:k>-129?2:k>-32769?3:k>-2147483649?5:9
+    If IsObject(v){
+      if objects.HasKey(v)
+        NumPut( 12,addr+0,"Char"),NumPut(objects[v],addr+1,"Int64"),addr+=9
+      else NumPut( 11,addr+0,"Char"),NumPut(sz:=RawObjectSize(v,buf),addr+1,"Int64"),RawObject(v,addr+9,buf,objects),addr+=sz+9
+    }else if (v+0=""||v ""!=v+0||v~="\s")
+      NumPut( 10,addr+0,"Char"),NumPut(sz:=buf?obj.GetCapacity(kIsString?"" k:k):StrPut(v)*2,addr+1,"Int64"),DllCall("RtlMoveMemory","PTR",addr+9,"PTR",buf?obj.GetAddress(kIsString?"" k:k):&v,"PTR",sz),addr+=sz+9
+    else NumPut(InStr(v,".")?9:v>4294967295?8:v>65535?6:v>255?4:v>-1?2:v>-129?1:v>-32769?3:v>-2147483649?5:7,addr+0,"Char")
+        ,NumPut(v,addr+1,InStr(v,".")?"Double":v>4294967295?"UInt64":v>65535?"UInt":v>255?"UShort":v>-1?"UChar":v>-129?"Char":v>-32769?"Short":v>-2147483649?"Int":"Int64")
+        ,addr+=InStr(v,".")||v>4294967295?9:v>65535?5:v>255?3:v>-129?2:v>-32769?3:v>-2147483649?5:9
+  }
+}
+RawObjectSize(obj,buf:=0,objects:=0){
+  if !objects
+    objects:={(obj):1}
+  else if !objects.HasKey(obj)
+    objects[obj]:=1
+  sz:=0
+  for k,v in obj
+  {
+    If !(kIsString:=0)&&IsObject(k)
+      sz+=objects.HasKey(k)?9:RawObjectSize(k,buf,objects)+9
+    else if (k+0=""||k ""!=k+0||k~="\s")
+      kIsString:=true,sz+=StrPut(k)*2+9
+    else sz+=InStr(k,".")||k>4294967295?9:k>65535?5:k>255?3:k>-129?2:k>-32769?3:k>-2147483649?5:9
+    If IsObject(v)
+      sz+=objects.HasKey(v)?9:RawObjectSize(v,buf,objects)+9
+    else if (v+0=""||v ""!=v+0||v~="\s")
+      sz+=(buf?obj.GetCapacity(kIsString?"" k:k):StrPut(v)*2)+9
+    else sz+=InStr(v,".")||v>4294967295?9:v>65535?5:v>255?3:v>-129?2:v>-32769?3:v>-2147483649?5:9
+  }
+  return sz
+}
