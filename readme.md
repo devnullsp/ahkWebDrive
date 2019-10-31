@@ -1,10 +1,8 @@
 # AHKWebSession
 
-> __IMPORTANT NOTES__
+> __IMPORTANT NOTE__
 
 >__¡¡This is not a Selenium port!!__
-
->__¡¡I used a modified Jxon library (jxonMod.ahk)!!__
 
 ## What is this
 
@@ -13,8 +11,6 @@ Is a Autohotkey native web client protocol.
 __Url API definition:__ https://w3c.github.io/webdriver
 
 this V1.0 inlude all functions but no actions, I'm working in this api.
-
-Rename maping between W3C api and AHKWebSession:
 
 They are only two objects:
 
@@ -28,7 +24,7 @@ The functions, defined by W3Cm, are organized by this two objects and the map is
 - Functions called with GET use _getNameFunciton_
 - Functions called with DELETE use _delNameFunction_
 - Functions called with POST are not rename, use _nameFunction_
-- Functions with 2 token (window, frame, etc) use _[prefix]NameToken1NameToken2_
+- Functions with 2 token (window, frame, etc, except Element) use _[prefix]NameToken1NameToken2_
 
 ## Using
 
