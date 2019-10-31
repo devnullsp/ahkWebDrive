@@ -8,7 +8,7 @@
 
 ## What is this
 
-Is a Autohotkey native web client protocol.
+Is a Autohotkey native WebDrive client protocol.
 
 __Url API definition:__ https://w3c.github.io/webdriver
 
