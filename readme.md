@@ -4,6 +4,8 @@
 
 >__¡¡This is not a Selenium port!!__
 
+>__use json api from teadrinker (authotkey)__
+
 ## What is this
 
 Is a Autohotkey native web client protocol.
