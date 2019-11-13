@@ -45,7 +45,7 @@ This sample show the minimun code needed to get one connection. Webdriver it's o
 
 wd := new WDSession("http://localhost:9515")
 if(wd.rc.isError){
-    msgbox % "Error:" wd.rc.error " " wd.rc.message
+    msgbox % "Error:" wd.rc.value.error " " wd.rc.value.message
     ExitApp
 }
 [... you code here ..]
@@ -60,17 +60,13 @@ Its attributes are:
 
 The more importants are:
 - __wd.rc.isError__: true/false if there is one 
-error.
-- __wd.rc.value__: the true asking data.
+error, messaging error is in value.
+- __wd.rc.value__: the true asking data (including error info).
 
 for debug or extend information:
 
 - __wd.rc.status__: http status from the webdriver.
-- __wd.rc.isErrorWeb__: true/false if there is an error communicating with the webdriver.
 - __wd.rc.raw__: raw data returning from the webdriver.
-- __wd.rc.json__: json from wd.rc.raw.
-- __wd.rc.error__: if isError = true, this is its text.
-- __wd.rc.message__: if isError = true, this is the error's message text.
 
 One time you are connected to and have one WDSession, it's then, when u can call the api. For example, click the documentation link in the autohotkey page:
 

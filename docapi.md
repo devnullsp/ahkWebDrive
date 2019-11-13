@@ -8,15 +8,31 @@ Todos los comandos afectan a la ventana "por defecto", o sea la actual. Podemos 
 
 Una vez en la ventana podemos obtener cualquier elemento web, este elemento estará disponible mientras exista la session y la ventana que lo contenga no esté cerrada y aunque activemos otra ventana.
 
+## Retorno de las operaciones
+
+Aunque cada llamada devuelve su propio retorno, siempre, se llena un atributo llamado llamado "rc" dentro de la sesión o del elemento donde se encuentran todos los datos del resultado.
+
+Para comprobar si la operación ha ido bien o mal se utiliza rc.isError (boolean).
+
+Este objetos contiene, además, otros atributos que sirven para depurar:
+- rc.status: status web devuelto
+- rc.raw: cadena json conteniendo el mensaje devuelto por el driver. 
+
+Y finalmente contiene el atributo "value" con el objeto json devuelto por el driver.
+
+En caso de error se pueden consultar los atributos "error" y "message", o sea, rc.value.error y rc.value.message.
+
+En caso de que no, "value" contendrá, en función de la llamada, desde "" (null) hasta objetos complejos.
+
 ## new/delete Sesión
 
-* new WDSession(location:="http://localhost:9515/", capabilities:=""): instancia una nueva sesión siendo location la dirección del Web Driver. opcionalmente se puede pasar un objeto con las capacidades que el driver pueda pedir.
-* delete()
+* __new WDSession(location:="http://localhost:9515/", capabilities:="")__: instancia una nueva sesión siendo location la URL del Web Driver. opcionalmente se puede pasar un objeto con las capacidades que el driver pueda necesitar. 
+* __delete()__: Finaliza la sessión y cierra la ventana. La sessión queda inutilizada y no se puede volver a usar.
 
 ## Llamadas concernientes a la "ventana del navegador"
 
 ### Navegar
-* __url(url)__: Cargar a una url nueva en la ventana actual. __url__: String conteniendo la dirección. 
+* __url(url)__: Cargar a una url nueva en la ventana actual. Parametro __url__ String conteniendo la dirección. 
 * __getUrl()__: Deveulve la _url_ de la pagina actual.
 * __getTitle()__: Obtiene el _título_ de la ventana actual.
 
@@ -44,17 +60,19 @@ Una vez en la ventana podemos obtener cualquier elemento web, este elemento esta
 ### Javascript
 * __execute(script, args:="", sync:="sync")__: Ejecuta el cotenido de _script_ usnado un array de _args_ que luego estarán disponibles en el código como _arguments[0..n]_. El modo por defecto es _WDSession.sync_, aunque se puede ejecutar asyncronamente pasando como valor de sync _WDSession.async_.
 
+### Cookies
+* __getAllCookies()__: Devuelve la lista de cookies. Un objeto cada una conteniendo los atributos name, value, path, domain, secure, httpOnly, y expiry. 
+* __getCookie(name)__: Devuelve los datos de una cookie
+* __cookie(name,value,path:="",domain:="",secure:="",httpOnly:="",expiry:="")__:
+* __delCookie(name)__:
+* __delAllCookies()__:
+
 
 
 * __getElementActive()__:
 * __element(selector, value)__:
 * __elements(selector, value)__:
 * __getSource()__:
-* __getAllCookies()__:
-* __getCookie(name)__:
-* __cookie(name,value,path:="",domain:="",secure:="",httpOnly:="",expiry:="")__:
-* __delCookie(name)__:
-* __delAllCookies()__:
 * __getScreenshot()__:
 * __alertDismiss()__:
 * __alertAccept()__:
