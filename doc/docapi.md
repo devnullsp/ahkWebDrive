@@ -36,6 +36,13 @@ En caso de que no, "value" contendrá, en función de la llamada, desde "" (null
 * __getUrl()__: Devuelve la _url_ (String) de la pagina actual.
 * __getTitle()__: Devuelve el _título_ (String) de la ventana actual.
 
+### Obtener elementos de la pagina
+Estos elementos tienen un api propia mas abajo.
+
+* __getElementActive()__: Devuelve un elemento web en formato de clase WDSession.WDElement.
+* __element(selector, value)__: Devuelve el primer objeto que cumpla el valor dado del selector.
+* __elements(selector, value)__: Devuelve todos los objetos encontrados que cumplan el valor.
+
 ### Crear, obtener ventans
 * __newWindow(type)__: Añade una ventana de navegador nueva a la sesión. El parametro _type_  puede ser "tab" (por defecto) o "window", e indica si se crea una pagina o una ventana nueva. _tab/window_ dependerán de la implementación del driver. Devuelve un _hadle_ (String) de ventana.
 * __window(handle)__:  Activa una ventana de navegador. Parametro _handle_ (String) es la ventana a activar siendo un valor devuelto por _getWidnowHandles_ o _newWindow_. Devuelve _true/false_.
@@ -62,19 +69,17 @@ _x_,_y_ coordenadas del origen, _width_,_height_ ancho y alto de la ventana (en 
 * __execute(script, args:="", sync:="sync")__: Ejecuta el cotenido de _script_ usnado un array de _args_ que luego estarán disponibles en el código como _arguments[0..n]_. El modo por defecto es _WDSession.sync_, aunque se puede ejecutar asyncronamente pasando como valor de sync _WDSession.async_.
 
 ### Cookies
-* __getAllCookies()__: Devuelve la lista de cookies. Un objeto cada una conteniendo los atributos name, value, path, domain, secure, httpOnly, y expiry. 
-* __getCookie(name)__: Devuelve los datos de una cookie
-* __cookie(name,value,path:="",domain:="",secure:="",httpOnly:="",expiry:="")__:
-* __delCookie(name)__:
-* __delAllCookies()__:
+* __getAllCookies()__: Devuelve la lista (Array autohotkey) de cookies. Un objeto por cada una conteniendo los atributos name, value, path, domain, secure, httpOnly, y expiry. 
+* __getCookie(name)__: _name_ (String) es el nombre de la cookie. Devuelve los datos de una cookie en un objeto con los atributos anteriores.
+* __cookie(name,value,path:="",domain:="",secure:="",httpOnly:="",expiry:="")__: Crea una cookie nueva, _name_,_value_ son obligatorios, el resto opcional. Devuelve _true/false_.
+* __delCookie(name)__: _name_ (String) es el nombre de la cookie a borrar. Devuelve _true/false_.
+* __delAllCookies()__: borra todas la cookies. Devuelve _true/false_.
 
+### Mensaje de Alerta
+* __alertDismiss()__: Si hay, cancela una alerta (boton cancelar). Devuelve _true/false_.
+* __alertAccept()__: Si hay, acepta una alerta (boton aceptar). Devuelve _true/false_.
+* __getAlertText()__: Si hay alerta, devuelve el texto contenido en la alerta. Devuelve _true/false_.
 
-
-* __getElementActive()__:
-* __element(selector, value)__:
-* __elements(selector, value)__:
-* __getSource()__:
-* __getScreenshot()__:
-* __alertDismiss()__:
-* __alertAccept()__:
-* __getAlertText()__:_
+### Depurar
+* __getSource()__: Devuelve una cadena (String) conteniendo el codigo fuente de la pagina.
+* __getScreenshot()__: Devuelve en Base64 el PNG de la pantalla capturada.
