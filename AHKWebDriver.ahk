@@ -138,7 +138,9 @@ class WDSession{
 				body.height := height
 		}
 		this.rc := WDSession.__ws("POST", this.prefijo "session/" this.sessionId "/window/rect", JSON.Stringify(body))
-		return this.rc.isError
+		if(this.rc.isError)
+			return ""
+		return this.rc.value
 	}
 	frame(id:=""){
 		local body := "{""id"": "

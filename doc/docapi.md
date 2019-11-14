@@ -24,7 +24,7 @@ En caso de error se pueden consultar los atributos "error" y "message", o sea, r
 
 En caso de que no, "value" contendrá, en función de la llamada, desde "" (null) hasta objetos complejos.
 
-## new/delete Sesión
+## crear/finalizar Sesión
 
 * __new WDSession(location:="http://localhost:9515/", capabilities:="")__: instancia una nueva sesión siendo location la URL del Web Driver. opcionalmente se puede pasar un objeto con las capacidades que el driver pueda necesitar. 
 * __delete()__: Finaliza la sessión y cierra la ventana. La sessión queda inutilizada y no se puede volver a usar.
@@ -32,30 +32,31 @@ En caso de que no, "value" contendrá, en función de la llamada, desde "" (null
 ## Llamadas concernientes a la "ventana del navegador"
 
 ### Navegar
-* __url(url)__: Cargar a una url nueva en la ventana actual. Parametro __url__ String conteniendo la dirección. 
-* __getUrl()__: Deveulve la _url_ de la pagina actual.
-* __getTitle()__: Obtiene el _título_ de la ventana actual.
+* __url(url)__: Cargar a una url nueva en la ventana actual. Parametro _url_ (String) conteniene la dirección a cargar. Devuelve _true/false_.
+* __getUrl()__: Devuelve la _url_ (String) de la pagina actual.
+* __getTitle()__: Devuelve el _título_ (String) de la ventana actual.
 
 ### Crear, obtener ventans
-* __newWindow(type)__: Añade una ventana de navegador nueva a la sesión. __type__: "tab" (por defecto) crea una nueva hoja. "window" crea una nueva ventana. tab/window dependerán de la implementación del driver. Devuelve un __hadle__ de ventana.
-* __window(handle)__:  Activa una ventana de navegador. __handle__ es un valor devuelto por _getWidnowHandles_ o _newWindow_
-* __getWindow()__: Obtiene el _handle_ de la ventana actual.
-* __getWindowHandles()__: Devuelve un array (autohotkey) con todos los _handle_ de las ventanas de la sesión.
-* __closeWindow()__: Cierra la ventana actual.
+* __newWindow(type)__: Añade una ventana de navegador nueva a la sesión. El parametro _type_  puede ser "tab" (por defecto) o "window", e indica si se crea una pagina o una ventana nueva. _tab/window_ dependerán de la implementación del driver. Devuelve un _hadle_ (String) de ventana.
+* __window(handle)__:  Activa una ventana de navegador. Parametro _handle_ (String) es la ventana a activar siendo un valor devuelto por _getWidnowHandles_ o _newWindow_. Devuelve _true/false_.
+* __getWindow()__: Devuelve el _handle_ (String) de la ventana actual.
+* __getWindowHandles()__: Devuelve un array de autohotkey con todos los _handle_ (String) de las ventanas de la sesión.
+* __closeWindow()__: Cierra la ventana actual, e invalida el _handle_ correspondiente. Devuelve _true/false_.
 
 ### Tamaño y posición
-* __getWindowRect()__: El objeto rc.value devuelto contiene los atributos x,y,width y height. __x__,__y__ coordenadas del origen, __width__,__height__ ancho y alto de la ventana (en pixeles).
-* __windowMaximize()/windowMinimize()/windowFullscreen()__: Maximiza, minimiza o pasa a pantalla completa la ventana actual.
-* __windowRect(x:="", y:="", width:="", height:="")__: Asigna posición y/o tamaño a la ventana actual. __x__,__y__ coordenadas del origen, __width__,__height__ ancho y alto de la ventana (en pixelse).
+* __getWindowRect()__: Devuelve la posición y el tamaño de la ventana en un objeto que contiene los atributos _x_,_y_ coordenadas del origen, _width_,_height_ ancho y alto de la ventana (en pixeles). O nulo en caso de error.
+* __windowMaximize()/windowMinimize()/windowFullscreen()__: Maximiza, minimiza o pasa a pantalla completa la ventana actual. Devuelven _true/false_.
+* __windowRect(x:="", y:="", width:="", height:="")__: Asigna posición y/o tamaño a la ventana actual. 
+_x_,_y_ coordenadas del origen, _width_,_height_ ancho y alto de la ventana (en pixeles). Si _x_ es un objeto se utilizará directamente, este objeto ha de contener los mismos atributos.
 
 ### Historial
-* __back()__: Carga la pagina anterior del historial.
-* __forward()__: Carga la pagina siguiente del historial.
-* __refresh()__: Refresca la ventana actual.
+* __back()__: Carga la pagina anterior del historial. Devuelve _true/false_.
+* __forward()__: Carga la pagina siguiente del historial. Devuelve _true/false_.
+* __refresh()__: Refresca la ventana actual. Devuelve _true/false_.
 
 ### Frames
-* __frame(id:="")__: Activa un frame en la ventana actual. __id__ si es "" activa el frame top. si es un numero, activa dicho frame. En caso de que sea un Web Elemento activa dicho elemento (si es frame o iframe).
-* __frameParent()__: Activa el frame padre del actual.
+* __frame(id:="")__: Activa un frame en la ventana actual. _id_ si es "" activa el frame top. si es un numero, activa dicho frame. En caso de que sea un Web Elemento activa dicho elemento (si es frame o iframe).Devuelve _true/false_.
+* __frameParent()__: Activa el frame padre del actual. Devuelve _true/false_.
 
 ### Javascript
 * __execute(script, args:="", sync:="sync")__: Ejecuta el cotenido de _script_ usnado un array de _args_ que luego estarán disponibles en el código como _arguments[0..n]_. El modo por defecto es _WDSession.sync_, aunque se puede ejecutar asyncronamente pasando como valor de sync _WDSession.async_.
