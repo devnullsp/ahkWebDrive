@@ -41,6 +41,7 @@ class WDSession{
     sessionId := ""
     prefijo   := ""
     rc        := ""
+	capabilities := ""
     __New(location:="http://localhost:9515/", capabilities:=""){
  	    local body := {}
 		 if(capabilities != ""){
@@ -51,6 +52,8 @@ class WDSession{
 			body := "{""capabilities"":{}}"
 		this.prefijo:=location
         this.rc := WDSession.__ws("POST", this.prefijo "session",body )
+		this.sessionId := this.rc.value.sessionid
+		this.capabilities := this.rc.value.capabilities
        	return this
     }
     url(url){
