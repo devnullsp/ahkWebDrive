@@ -42,11 +42,15 @@ class WDSession{
     prefijo   := ""
     rc        := ""
 	capabilities := ""
+	
     __New(location:="http://localhost:9515/", capabilities:=""){
  	    local body := {}
 		 if(capabilities != ""){
-        	body.capabilities := capabilities
-			body := JSON.Stringify(body)
+			if(isObject(capabilities)){
+				body.capabilities := capabilities
+				body := JSON.Stringify(body)
+			}else
+				body := capabilities
 		 }
 		else 
 			body := "{""capabilities"":{}}"
@@ -401,7 +405,8 @@ class WDSession{
 		rc.status  := WS_SERVIDOR.Status
 		rc.isError := (WS_SERVIDOR.Status < 200 or WS_SERVIDOR.Status > 299)
 		rc.raw     := WS_SERVIDOR.ResponseText
-		rc.value    := JSON.Parse(rc.raw).value
+		rc.value   := JSON.Parse(rc.raw).value
+		rc.sendRaw :=  cuerpo
 		return rc
 	}
 
